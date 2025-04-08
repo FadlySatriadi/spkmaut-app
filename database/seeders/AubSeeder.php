@@ -17,12 +17,12 @@ class AubSeeder extends Seeder
             [
                 'idaub' => 1,
                 'kodeaub' => 'SBB',
-                'aub' => 'Solusi Bangun Beton'
+                'namaaub' => 'Solusi Bangun Beton'
             ],
             [
                 'idaub' => 2,
                 'kodeaub' => 'VUB',
-                'aub' => 'Varia Usaha Beton'
+                'namaaub' => 'Varia Usaha Beton'
             ]
             ];
 

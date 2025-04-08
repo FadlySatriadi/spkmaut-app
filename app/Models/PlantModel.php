@@ -17,12 +17,25 @@ class PlantModel extends Model
         'idaub',
         'namaplant',
         'kodeplant',
-        'lokasi',
         'status',
     ];
+
+    const STATUSES = [
+        'aktif' => 'aktif',
+        'nonaktif' => 'nonaktif',
+    ];
+
+    public static function getStatusOptions()
+    {
+        return array_keys(self::STATUSES);
+    }
 
     public function aub()
     {
         return $this->belongsTo(AubModel::class, 'idaub', 'idaub');
+    }
+    public function alternatifs(): HasMany
+    {
+        return $this->hasMany(AlternatifModel::class, 'idplant', 'idplant');
     }
 }

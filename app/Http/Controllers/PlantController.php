@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\PlantModel;
 use App\Models\AubModel;
 use Illuminate\Http\Request;
@@ -14,63 +15,80 @@ class PlantController extends Controller
     public function index(Request $request)
     {
         $breadcrumb = (object) [
-            'title' => 'Tambah Aub',
-            'list' => ['Home', 'Aub', 'Tambah']
+            'title' => 'Daftar Plant',
+            'list' => ['Home', 'Plant']
         ];
 
-        $page = (object)[
-            'title' => 'Tambah Data Anak Usaha'
-        ];
+        $page = (object)['title' => 'Daftar Plant yang terdaftar dalam sistem'];
+        $activeMenu = 'plant';
 
         $query = PlantModel::with('aub');
-        
-        // Filter by Kode AUB (melalui relasi)
+
+        // Filter by Kode AUB
         if ($request->filled('kodeaub')) {
-            $query->whereHas('aub', function($q) use ($request) {
+            $query->whereHas('aub', function ($q) use ($request) {
                 $q->where('kodeaub', $request->kodeaub);
             });
         }
-        
+
         // Filter by Nama Plant
         if ($request->filled('namaplant')) {
-            $query->where('namaplant', 'LIKE', '%'.$request->namaplant.'%');
+            $query->where('namaplant', 'LIKE', '%' . $request->namaplant . '%');
         }
-        
-        $plant = $query->get();
-        $filterKodeAUB = AubModel::select('kodeaub')->distinct()->pluck('kodeaub');
-        
-        $activeMenu = 'plant';
 
-        return view('plant.index', ['breadcrumb' => $breadcrumb, 'page' => $page, 'plant' => $plant, 'filterKodeAUB' => $filterKodeAUB, 'activeMenu' => $activeMenu]);
+        // Filter by Status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $plant = $query->paginate(10);
+
+        $filterKodeAUB = AubModel::select('kodeaub')->distinct()->pluck('kodeaub');
+        $statusOptions = ['aktif', 'nonaktif']; // Sesuaikan dengan enum status di database
+
+        return view('plant.index', [
+            'breadcrumb' => $breadcrumb,
+            'page' => $page,
+            'plant' => $plant,
+            'filterKodeAUB' => $filterKodeAUB,
+            'statusOptions' => $statusOptions,
+            'activeMenu' => $activeMenu
+        ]);
     }
 
     public function create()
     {
         $breadcrumb = (object) [
-            'title' => 'Tambah Aub',
-            'list' => ['Home', 'Aub', 'Tambah']
+            'title' => 'Tambah Plant',
+            'list' => ['Home', 'Plant', 'Tambah']
         ];
 
         $page = (object)[
-            'title' => 'Tambah Data Anak Usaha'
+            'title' => 'Tambah Data Batching Plant'
         ];
 
         $plant = PlantModel::all();
         $activeMenu = 'plant';
+        $kodeAUBops = AubModel::select('idaub', 'kodeaub')->get();
+        $statusOptions = ['aktif', 'nonaktif'];
 
-        return view('plant.create', ['breadcrumb' => $breadcrumb, 'page' => $page, 'plant' => $plant, 'activeMenu' => $activeMenu]);
+        return view('plant.create', ['breadcrumb' => $breadcrumb, 'page' => $page, 'plant' => $plant, 'kodeAUBops' => $kodeAUBops, 'statusOptions' => $statusOptions, 'activeMenu' => $activeMenu]);
     }
 
     public function store(Request $request)
     {
         $request->validate([
+            'idaub' => 'required|exists:aub,idaub',
             'kodeplant' => 'required|string|min:3|unique:plant,kodeplant',
-            'namaplant' => 'required|string|max:100'
+            'namaplant' => 'required|string|max:100',
+            'status' => 'required',
         ]);
 
         PlantModel::create([
+            'idaub' => $request->idaub,
             'kodeplant' => $request->kodeplant,
-            'namaplant' => $request->namaplant
+            'namaplant' => $request->namaplant,
+            'status'    => $request->status
         ]);
 
         return redirect('/plant')->with('success', 'Data plant berhasil ditambahkan');
@@ -115,13 +133,15 @@ class PlantController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'kodeplant' => 'required|string|min:3',
-            'namaplant' => 'required|string|max:100'
+            'kodeplant' => 'required|string|min:4',
+            'namaplant' => 'required|string|max:100',
+            'status'    => 'required'
         ]);
 
         PlantModel::find($id)->update([
             'kodeplant' => $request->kodeplant,
-            'namaplant' => $request->namaplant
+            'namaplant' => $request->namaplant,
+            'status'    => $request->status
         ]);
         return redirect('/plant')->with('success', 'Data berhasil diubah');
     }

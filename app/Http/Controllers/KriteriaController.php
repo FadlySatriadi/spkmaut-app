@@ -28,13 +28,23 @@ class KriteriaController extends Controller
 
         $kriteria = $query->get();
 
+        $totalBobot = $kriteria->sum('bobotkriteria');
+    
+        // Tambahkan bobot normalisasi ke setiap kriteria
+        $kriteria->each(function ($item) use ($totalBobot) {
+            $item->bobotnormalisasi = $totalBobot > 0 ? $item->bobotkriteria / $totalBobot : 0;
+        });
+
+        $totalBobotNormalisasi = $kriteria->sum('bobotnormalisasi');
+
         // $uniqueCodes = KriteriaModel::select('kodekriteria')->distinct()->pluck('kodekriteria');
         return view('kriteria.index', [
             'breadcrumb' => $breadcrumb,
             'page' => $page,
             'activeMenu' => $activeMenu,
-            'kriteria' => $kriteria, // Kirim data ke view
-            
+            'kriteria' => $kriteria,
+            'totalBobot' => $totalBobot,
+            'totalBobotNormalisasi' => $totalBobotNormalisasi
         ]);
     }
 
@@ -109,13 +119,15 @@ class KriteriaController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'kodekriteria' => 'required|string|min:3',
-            'namakriteria' => 'required|string|max:100'
+            'kodekriteria' => 'required|string|min:2',
+            'namakriteria' => 'required|string|max:100',
+            'bobotkriteria' => 'required|numeric'
         ]);
 
         KriteriaModel::find($id)->update([
             'kodekriteria' => $request->kodekriteria,
-            'namakriteria' => $request->namakriteria
+            'namakriteria' => $request->namakriteria,
+            'bobotkriteria' => $request->bobotkriteria
         ]);
         return redirect('/kriteria')->with('success', 'Data berhasil diubah');
     }

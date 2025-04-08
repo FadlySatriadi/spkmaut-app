@@ -22,9 +22,9 @@
                     <div class="form-group row">
                         <label class="col-1 control-label col-form-label">Nama AUB</label>
                         <div class="col-11">
-                            <input type="text" class="form-control" style="border: 1px solid #800000;" id="aub" name="aub"
-                                value="{{ old('aub', $aub->aub) }}" required>
-                            @error('aub')
+                            <input type="text" class="form-control" style="border: 1px solid #800000;" id="namaaub" name="namaaub"
+                                value="{{ old('namaaub', $aub->namaaub) }}" required>
+                            @error('namaaub')
                                 <small class="form-text text-danger">{{ $message }}</small>
                             @enderror
                         </div>

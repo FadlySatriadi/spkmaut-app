@@ -28,6 +28,7 @@
                         <th class="text-center">Kode Kriteria</th>
                         <th class="text-center">Nama Kriteria</th>
                         <th class="text-center">Bobot</th>
+                        <th class="text-center">Bobot Normalisasi</th>
                         <th class="text-center">Aksi</th>
                     </tr>
                 </thead>
@@ -38,6 +39,7 @@
                         <td class="text-center">{{ $item->kodekriteria }}</td>
                         <td class="text-center">{{ $item->namakriteria }}</td>
                         <td class="text-center">{{ $item->bobotkriteria }}</td>
+                        <td class="text-center">{{ number_format($item->bobotnormalisasi, 4) }}</td>
                         <td class="text-center">
                             <a href="{{ url('/kriteria/'.$item->idkriteria) }}" class="btn btn-info btn-sm" style="background-color: #03254c  ; color: white; border-color: #03254c;">Detail</a>
                             <a href="{{ url('/kriteria/'.$item->idkriteria.'/edit') }}" class="btn btn-warning btn-sm">Edit</a>
@@ -50,6 +52,12 @@
                         </td>
                     </tr>
                     @endforeach
+                    <tr style="font-weight: bold;">
+                        <td colspan="3" class="text-center">TOTAL</td>
+                        <td class="text-center">{{ number_format($totalBobot) }}</td>
+                        <td class="text-center">{{ number_format($totalBobotNormalisasi, 1) }}</td>
+                        <td></td>
+                    </tr>
                 </tbody>
             </table>
         </div>

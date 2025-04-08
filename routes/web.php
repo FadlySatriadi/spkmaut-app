@@ -5,6 +5,7 @@ use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\AubController;
 use App\Http\Controllers\KriteriaController;
 use App\Http\Controllers\PlantController;
+use App\Http\Controllers\AlternatifController;
 
 Route::get('/', [WelcomeController::class,'index']);
 
@@ -36,4 +37,14 @@ Route::group(['prefix' => 'kriteria'], function () {
     Route::get('/{id}/edit', [KriteriaController::class, 'edit']);
     Route::put('/{id}', [KriteriaController::class, 'update']);
     Route::delete('/{id}', [KriteriaController::class, 'destroy']);
+});
+
+Route::group(['prefix' => 'alternatif'], function () {
+    Route::get('/', [AlternatifController::class, 'index']);
+    Route::get('/create', [AlternatifController::class, 'create']);
+    Route::post('/', [AlternatifController::class, 'store']);
+    Route::get('/{id}', [AlternatifController::class, 'show']);
+    Route::get('/{id}/edit', [AlternatifController::class, 'edit']);
+    Route::put('/{id}', [AlternatifController::class, 'update']);
+    Route::delete('/{id}', [AlternatifController::class, 'destroy']);
 });

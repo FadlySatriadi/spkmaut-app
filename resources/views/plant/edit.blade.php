@@ -20,14 +20,26 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label class="col-1 control-label col-form-label">Nama Plant</label>
+                        <label class="col-1 control-label col-form-label">Nama</label>
                         <div class="col-11">
-                            <input type="text" class="form-control" style="border: 1px solid #800000;" id="plant" name="plant"
-                                value="{{ old('plant', $plant->plant) }}" required>
-                            @error('plant')
+                            <input type="text" class="form-control" style="border: 1px solid #800000;" id="namaplant" name="namaplant"
+                                value="{{ old('namaplant', $plant->namaplant) }}" required>
+                            @error('namaplant')
                                 <small class="form-text text-danger">{{ $message }}</small>
                             @enderror
                         </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-1 control-label col-form-label">Status</label>
+                        <div class="col-11">
+                            <select class="form-control" style="border: 1px solid #800000;" name="status">
+                                @foreach(App\Models\PlantModel::STATUSES as $value => $label)
+                                <option value="{{ $value }}" {{ $plant->status == $value ? 'selected' : '' }}>
+                                    {{ $label }}
+                                </option>
+                                @endforeach
+                            </select>
+                            </div>
                     </div>
                     <div class="form-group row">
                         <label class="col-1 control-label col-form-label"></label>

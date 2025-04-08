@@ -20,11 +20,21 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label class="col-1 control-label col-form-label">Nama Kritera</label>
+                        <label class="col-1 control-label col-form-label">Nama Kriteria</label>
                         <div class="col-11">
                             <input type="text" class="form-control" style="border: 1px solid #800000;" id="namakriteria" name="namakriteria"
-                                value="{{ old('kriteria', $kriteria->kriteria) }}" required>
-                            @error('kriteria')
+                                value="{{ old('namakriteria', $kriteria->namakriteria) }}" required>
+                            @error('namakriteria')
+                                <small class="form-text text-danger">{{ $message }}</small>
+                            @enderror
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-1 control-label col-form-label">Bobot</label>
+                        <div class="col-11">
+                            <input type="text" class="form-control" style="border: 1px solid #800000;" id="bobotkriteria" name="bobotkriteria"
+                                value="{{ old('bobotkriteria', $kriteria->bobotkriteria) }}" required>
+                            @error('bobotkriteria')
                                 <small class="form-text text-danger">{{ $message }}</small>
                             @enderror
                         </div>

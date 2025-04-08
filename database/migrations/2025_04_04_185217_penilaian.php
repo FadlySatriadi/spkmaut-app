@@ -15,13 +15,15 @@ return new class extends Migration
             $table->id('idpenilaian');
             $table->unsignedBigInteger('iduser');
             $table->unsignedBigInteger('idalternatif');
-            $table->unsignedBigInteger('idsubkriteria');
-            $table->float('nilai');
+            $table->unsignedBigInteger('idkriteria');
+            $table->string('minmax');
+            $table->string('matrixnormalisasi');
+            $table->float('hasil');
             $table->timestamps();
 
             $table->foreign('iduser')->references('iduser')->on('user');
             $table->foreign('idalternatif')->references('idalternatif')->on('alternatif');
-            $table->foreign('idsubkriteria')->references('idsubkriteria')->on('subkriteria');
+            $table->foreign('idkriteria')->references('idkriteria')->on('kriteria');
         });
     }
 

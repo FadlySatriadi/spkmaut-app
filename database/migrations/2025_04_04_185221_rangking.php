@@ -13,7 +13,11 @@ return new class extends Migration
     {
         Schema::create('rangking', function (Blueprint $table) {
             $table->id('idrangking');
+            $table->unsignedBigInteger('idpenilaian');
+            $table->string('peringkat');
             $table->timestamps();
+
+            $table->foreign('idpenilaian')->references('idpenilaian')->on('penilaian');
         });
     }
 
