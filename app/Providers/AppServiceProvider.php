@@ -2,8 +2,8 @@
 
 namespace App\Providers;
 
+use Yajra\DataTables\Html\Builder;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Support\Facades\Schema;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -20,6 +20,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Schema::disableForeignKeyConstraints();
+        Builder::useVite();
     }
 }

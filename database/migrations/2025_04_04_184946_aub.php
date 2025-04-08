@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('aub', function (Blueprint $table) {
             $table->id('idaub');
             $table->string('kodeaub');
-            $table->string('aub');
+            $table->string('namaaub');
             $table->timestamps();
         });
     }

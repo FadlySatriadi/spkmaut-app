@@ -68,6 +68,18 @@
                     <p>Data AUB</p>
                 </a>
             </li>
+            <li class="nav-item">
+                <a href="{{ url('/plant') }}" class="nav-link {{ $activeMenu == 'plant' ? 'active' : '' }}">
+                    <i class="nav-icon fa fa-industry"></i>
+                    <p>Data Plant</p>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url('/kriteria') }}" class="nav-link {{ $activeMenu == 'kriteria' ? 'active' : '' }}">
+                    <i class="nav-icon fa fa-envelope"></i>
+                    <p>Data Kriteria</p>
+                </a>
+            </li>
         </ul>
     </nav>
 </div>
