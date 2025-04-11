@@ -1,13 +1,23 @@
 <?php
 
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\AubController;
 use App\Http\Controllers\KriteriaController;
 use App\Http\Controllers\PlantController;
 use App\Http\Controllers\AlternatifController;
+use App\Http\Controllers\AuthController;
 
-Route::get('/', [WelcomeController::class,'index']);
+// Route untuk guest (tanpa auth)
+Route::get('login', [AuthController::class, 'index'])->name('login');
+Route::post('proses_login', [AuthController::class, 'proses_login'])->name('proses_login');
+
+// Route yang membutuhkan auth
+Route::middleware(['auth'])->group(function () {
+    Route::get('/welcome', [WelcomeController::class, 'index'])->name('welcome');
+    // Tambahkan route lain yang membutuhkan auth di sini
+});
 
 Route::group(['prefix' => 'aub'], function () {
     Route::get('/', [AubController::class, 'index']);

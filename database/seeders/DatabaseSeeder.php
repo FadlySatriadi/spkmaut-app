@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,11 +13,32 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Nonaktifkan foreign key check sementara
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        // Jalankan seeder dengan urutan yang benar
+        $this->call([
+            // 1. Seeder untuk data master/dasar
+            RoleSeeder::class,
+            UserSeeder::class,
+            AubSeeder::class,
+            PlantSeeder::class,
+            
+            // 2. Seeder untuk data referensi
+            KriteriaSeeder::class,
+            AlternatifSeeder::class,
+            
+            // 3. Seeder untuk data transaksi
+            PenilaianSeeder::class,
+            
+            // 4. Seeder untuk hasil perhitungan
+            RangkingSeeder::class,
         ]);
+
+        // Aktifkan kembali foreign key check
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+        // Tambahkan output informasi
+        $this->command->info('Semua seeder telah berhasil dijalankan!');
     }
 }

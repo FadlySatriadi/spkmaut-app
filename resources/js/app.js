@@ -1,7 +1,7 @@
-import "./bootstrap";
-import "../sass/app.scss";
-import "laravel-datatables-vite";
-import DataTables from 'datatables.net';
+import './bootstrap';
 
-window.DataTable = DataTables;
-$('#myTable').DataTable();
+import Alpine from 'alpinejs';
+
+window.Alpine = Alpine;
+
+Alpine.start();

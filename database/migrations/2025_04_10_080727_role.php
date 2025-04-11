@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('rangking', function (Blueprint $table) {
-            $table->id('idrangking');
-            $table->unsignedBigInteger('idpenilaian');
-            $table->string('peringkat');
+        Schema::create('role', function (Blueprint $table) {
+            $table->id('idrole');
+            $table->string('nama_role', 50); // admin, officer, dll
+            $table->text('deskripsi')->nullable();
             $table->timestamps();
-
-            $table->foreign('idpenilaian')->references('idpenilaian')->on('penilaian');
         });
+        
+        
     }
 
     /**
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('rangking');
+        Schema::dropIfExists('user');
     }
 };

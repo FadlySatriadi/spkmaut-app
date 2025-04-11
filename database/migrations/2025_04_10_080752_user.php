@@ -16,8 +16,10 @@ return new class extends Migration
             $table->string('username', 20)->unique();
             $table->string('nama', 100);
             $table->string('password');
-            $table->enum('role', ['admin', 'officer']);
+            $table->unsignedBigInteger('idrole');
             $table->timestamps();
+            
+            $table->foreign('idrole')->references('idrole')->on('role');
         });
     }
 
@@ -27,5 +29,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('user');
+        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('sessions');
     }
 };

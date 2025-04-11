@@ -11,12 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('alternatif', function (Blueprint $table) {
-            $table->id('idalternatif');
-            $table->unsignedBigInteger('idplant');
-            $table->string('kodealternatif');
-
-            $table->foreign('idplant')->references('idplant')->on('plant');
+        Schema::create('aub', function (Blueprint $table) {
+            $table->id('idaub');
+            $table->string('kodeaub');
+            $table->string('namaaub');
+            $table->timestamps();
         });
     }
 
@@ -25,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('alternatif');
+        Schema::dropIfExists('aub');
     }
 };
