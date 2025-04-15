@@ -23,6 +23,7 @@
     },
     "dependencies": {
         "20": "^1.0.0",
-        "datatables.net": "^2.2.2"
+        "datatables.net": "^2.2.2",
+        "select2": "^4.1.0-rc.0"
     }
 }

@@ -57,6 +57,7 @@
                     <tr>
                         <th class="text-center">No</th>
                         <th class="text-center">Kode Plant</th>
+                        <th class="text-center">Kode Alternatif</th>
                         <th class="text-center">Nama Plant</th>
                         <th class="text-center">Status</th>
                         <th class="text-center">Aksi</th>
@@ -67,6 +68,7 @@
                         <tr>
                             <td class="text-center">{{ $item->idplant }}</td>
                             <td class="text-center">{{ $item->kodeplant }}</td>
+                            <td class="text-center">{{ $item->kodealternatif }}</td>
                             <td class="text-center">{{ $item->namaplant }}</td>
                             <td class="text-center">{{ $item->status }}</td>
                             <td class="text-center">

@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('rangking', function (Blueprint $table) {
-            $table->id('idrangking');
-            $table->unsignedBigInteger('idpenilaian');
-            $table->string('peringkat');
+        Schema::create('kriteria', function (Blueprint $table) {
+            $table->id('idkriteria');
+            $table->string('namakriteria', 100);
+            $table->string('kodekriteria', 5);
+            $table->float('bobotkriteria');
+            $table->enum('jeniskriteria', ['benefit', 'cost']);
             $table->timestamps();
-
-            $table->foreign('idpenilaian')->references('idpenilaian')->on('penilaian');
         });
     }
 
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('rangking');
+        Schema::dropIfExists('kriteria');
     }
 };

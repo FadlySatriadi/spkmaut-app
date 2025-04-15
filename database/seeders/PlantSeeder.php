@@ -136,6 +136,7 @@ class PlantSeeder extends Seeder
 
         $sbbCount = 1;
         $vubCount = 1;
+        $alternatifCount = 1;
 
         foreach ($plants as $plant) {
             $isSbb = $plant['namaplant'] === mb_strtoupper($plant['namaplant'], 'UTF-8');
@@ -144,6 +145,7 @@ class PlantSeeder extends Seeder
                 'idaub' => $isSbb ? 1 : 2,
                 'namaplant' => $plant['namaplant'],
                 'kodeplant' => $isSbb ? 'SBB' . $sbbCount++ : 'VUB' . $vubCount++,
+                'kodealternatif' => 'A' . $alternatifCount++,
                 'lokasi' => $plant['lokasi'],
                 'status' => 'aktif',
             ]);

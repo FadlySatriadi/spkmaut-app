@@ -16,5 +16,6 @@ class KriteriaModel extends Model
         'namakriteria',
         'kodekriteria',
         'bobotkriteria',
+        'jeniskriteria'
     ];
 }

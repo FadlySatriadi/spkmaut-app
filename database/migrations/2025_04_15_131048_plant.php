@@ -16,6 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('idaub');
             $table->string('namaplant');
             $table->string('kodeplant');
+            $table->string('kodealternatif');
             $table->text('lokasi');
             $table->enum('status', ['aktif', 'nonaktif']);
             $table->timestamps();

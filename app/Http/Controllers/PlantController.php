@@ -22,7 +22,7 @@ class PlantController extends Controller
         $page = (object)['title' => 'Daftar Plant yang terdaftar dalam sistem'];
         $activeMenu = 'plant';
 
-        $query = PlantModel::with('aub');
+        $query = PlantModel::with('aub')->select('idplant', 'idaub', 'kodeplant', 'namaplant', 'kodealternatif', 'status');
 
         // Filter by Kode AUB
         if ($request->filled('kodeaub')) {

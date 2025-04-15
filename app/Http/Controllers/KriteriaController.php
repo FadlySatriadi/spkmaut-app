@@ -20,7 +20,7 @@ class KriteriaController extends Controller
         $activeMenu = 'kriteria';
 
         // Ambil data langsung dengan filter
-        $query = KriteriaModel::select('idkriteria', 'kodekriteria', 'namakriteria', 'bobotkriteria');
+        $query = KriteriaModel::select('idkriteria', 'kodekriteria', 'namakriteria', 'bobotkriteria','jeniskriteria');
         
         if ($request->has('kodekriteria') && !empty($request->kodekriteria)) {
             $query->where('kodekriteria', $request->kodekriteria);

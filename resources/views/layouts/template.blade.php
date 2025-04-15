@@ -5,7 +5,7 @@
     <style>
         /* Footer tetap di bawah dan ukuran konsisten */
         .main-footer {
-            position: fixed;
+            position: flex;
             bottom: 0;
             left: 0;
             right: 0;
@@ -68,6 +68,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ config('app.name', 'SPK Batching Plant') }}</title>
 
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <!-- Select2 Bootstrap Theme (opsional) -->
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css"
+        rel="stylesheet" />
     <!-- Google Font: Source Sans Pro -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Font Awesome -->
@@ -118,6 +123,7 @@
             <!-- /.sidebar -->
         </aside>
 
+
         <!-- Content Wrapper. Contains page content -->
         <div class="content-wrapper">
             <!-- Content Header (Page header) -->
@@ -133,12 +139,34 @@
     </div>
     <!-- ./wrapper -->
 
-    <!-- jQuery -->
+    <!-- Hanya muat jQuery SATU KALI -->
     <script src="{{ asset('lte/plugins/jquery/jquery.min.js') }}"></script>
     <!-- Bootstrap 4 -->
     <script src="{{ asset('lte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <!-- AdminLTE App -->
     <script src="{{ asset('lte/dist/js/adminlte.min.js') }}"></script>
+    <!-- Select2 JS - Pastikan setelah jQuery -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Inisialisasi Select2 untuk semua elemen dengan class 'select2'
+            $('.select2').select2({
+                theme: 'bootstrap-5',
+                width: '100%', // Pastikan lebar penuh
+                placeholder: "Pilih opsi...", // Tambahkan placeholder
+                allowClear: true // Opsi untuk menghapus pilihan
+            });
+
+            // Jika menggunakan select2 multiple
+            $('.select2-multiple').select2({
+                theme: 'bootstrap-5',
+                width: '100%',
+                placeholder: "Pilih beberapa opsi...",
+                allowClear: true,
+                closeOnSelect: false // Untuk multiple select
+            });
+        });
+    </script>
 </body>
 
 </html>

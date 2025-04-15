@@ -15,13 +15,13 @@ class RoleSeeder extends Seeder
         $data = [
             [
                 'idrole' => 1,
-                'nama_role' => 'admin',
-                'deskripsi' => '',
+                'koderole' => 'ADM',
+                'namarole' => 'admin',
             ],
             [
                 'idrole' => 2,
-                'nama_role' => 'officer',
-                'deskripsi' => '',
+                'koderole' => 'OFC',
+                'namarole' => 'officer',
             ]
         ];
 

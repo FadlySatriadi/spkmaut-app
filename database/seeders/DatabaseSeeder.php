@@ -26,13 +26,6 @@ class DatabaseSeeder extends Seeder
             
             // 2. Seeder untuk data referensi
             KriteriaSeeder::class,
-            AlternatifSeeder::class,
-            
-            // 3. Seeder untuk data transaksi
-            PenilaianSeeder::class,
-            
-            // 4. Seeder untuk hasil perhitungan
-            RangkingSeeder::class,
         ]);
 
         // Aktifkan kembali foreign key check

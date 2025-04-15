@@ -11,11 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('kriteria', function (Blueprint $table) {
-            $table->id('idkriteria');
-            $table->string('namakriteria', 100);
-            $table->string('kodekriteria', 5);
-            $table->float('bobotkriteria');
+        Schema::create('admin', function (Blueprint $table) {
+            $table->id('idadmin');
+            $table->unsignedBigInteger('iduser');
             $table->timestamps();
         });
     }
@@ -25,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('kriteria');
+        Schema::dropIfExists('admin');
     }
 };

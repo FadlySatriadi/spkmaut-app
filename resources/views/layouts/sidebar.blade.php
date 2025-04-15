@@ -121,14 +121,24 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ url('/alternatif') }}"
-                                class="nav-link {{ $activeMenu == 'alternatif' ? 'active' : '' }}">
+                            <a href="{{ url('/rekomendasi/select-plants') }}"
+                                class="nav-link {{ $activeMenu == 'rekomendasi' ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-hard-hat"></i>
-                                <p>Data Alternatif</p>
+                                <p>Penilaian</p>
                             </a>
                         </li>
                     </ul>
                 </nav>
+                <div class="sidebar-footer p-2" style="border-top: 1px solid rgba(255,255,255,0.1);">
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="btn btn-block text-left nav-link" 
+                                style="color: #ffffff; background: transparent; border: none; padding: 0.5rem 1rem;">
+                            <i class="nav-icon fas fa-sign-out-alt"></i>
+                            <p style="display: inline;">Logout</p>
+                        </button>
+                    </form>
+                </div>
             </div>
         </aside>
     </div>
