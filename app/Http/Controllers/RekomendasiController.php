@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\PlantModel;
 use App\Models\KriteriaModel;
+use App\Models\PerhitunganHistory;
+use Illuminate\Support\Facades\Log;
 
 class RekomendasiController extends Controller
 {
@@ -45,11 +47,13 @@ class RekomendasiController extends Controller
         $activeMenu = 'alternatif';
 
         // Validasi
-        $request->validate([
+        $validated = $request->validate([
             'nilai' => 'required|array',
             'nilai.*' => 'required|array',
             'nilai.*.*' => 'required|numeric|min:0|max:10'
         ]);
+
+        session(['input_values' => $validated['nilai']]);
 
         // Ambil data dari session
         $plantIds = session('selected_plants');
@@ -108,6 +112,7 @@ class RekomendasiController extends Controller
                     'nama' => $criteria->namakriteria,
                     'jenis' => $criteria->jeniskriteria,
                     'nilai' => $nilai,
+                    'nilai' => $nilaiInput,
                     'normalized' => $normalizedValue,
                     'bobot' => $normalizedWeights[$criteria->idkriteria],
                     'utility' => $weightedUtility
@@ -131,7 +136,7 @@ class RekomendasiController extends Controller
 
     public function getCriterias()
     {
-        return response()->json(KriteriaModel::orderBy('kodekriteria', 'asc')->get());
+        return response()->json(KriteriaModel::orderByRaw('LENGTH(kodekriteria), kodekriteria')->get());
     }
 
     public function selectPlants()
@@ -144,7 +149,7 @@ class RekomendasiController extends Controller
         $activeMenu = 'alternatif';
 
         $plants = PlantModel::where('status', 'aktif')->get();
-        
+
         return view('rekomendasi.select-plants', [
             'breadcrumb' => $breadcrumb,
             'plants' => $plants,
@@ -183,7 +188,7 @@ class RekomendasiController extends Controller
         }
 
         $plants = PlantModel::whereIn('idplant', $plantIds)->get();
-        $criterias = KriteriaModel::orderBy('kodekriteria', 'asc')->get();
+        $criterias = KriteriaModel::orderByRaw('LENGTH(kodekriteria), kodekriteria')->get();
 
         return view('rekomendasi.input-nilai', [
             'breadcrumb' => $breadcrumb,
@@ -194,22 +199,159 @@ class RekomendasiController extends Controller
     }
 
     public function showDetail()
-{
-    // Ambil hasil perhitungan dari session atau hitung ulang
-    $results = session('calculation_results');
-    
-    if (!$results) {
-        return redirect()->route('rekomendasi.index')
-               ->with('error', 'Data perhitungan tidak ditemukan');
-    }
+    {
+        // 1. Validasi Data Session
+        if (!session()->has('input_values') || !session()->has('selected_plants')) {
+            return redirect()->route('rekomendasi.select-plant')
+                ->with('error', 'Data sesi tidak lengkap. Silakan lakukan perhitungan ulang.');
+        }
 
-    return view('rekomendasi.detail', [
-        'results' => $results,
-        'breadcrumb' => (object) [
-            'title' => 'Detail Perhitungan',
-            'list' => ['Home', 'Rekomendasi', 'Detail']
-        ],
-        'activeMenu' => 'rekomendasi'
-    ]);
-}
+        // 2. Ambil data dengan error handling
+        try {
+            $nilaiInput = session('input_values');
+            $selectedPlants = session('selected_plants');
+
+            // 3. Validasi struktur data
+            if (!is_array($nilaiInput) || !is_array($selectedPlants)) {
+                throw new \Exception("Format data sesi tidak valid");
+            }
+
+            $plants = PlantModel::whereIn('idplant', $selectedPlants)->get();
+            $criterias = KriteriaModel::orderByRaw('LENGTH(kodekriteria), kodekriteria')->get();
+
+            // 4. Validasi data plant dan kriteria
+            if ($plants->isEmpty() || $criterias->isEmpty()) {
+                throw new \Exception("Data referensi tidak ditemukan");
+            }
+
+            // 5. Perhitungan dengan logging
+            $totalBobot = $criterias->sum('bobotkriteria');
+
+            if ($totalBobot <= 0) {
+                throw new \Exception("Total bobot kriteria tidak valid");
+            }
+
+            // Normalisasi bobot
+            $normalizedWeights = $criterias->mapWithKeys(function ($criteria) use ($totalBobot) {
+                return [$criteria->idkriteria => $criteria->bobotkriteria / $totalBobot];
+            })->all();
+
+            // Normalisasi nilai dengan handling division by zero
+            $normalized = [];
+            foreach ($plants as $plant) {
+                foreach ($criterias as $criteria) {
+                    $nilai = $nilaiInput[$plant->idplant][$criteria->idkriteria] ?? 0;
+                    $max = $criterias->where('kodekriteria', $criteria->kodekriteria)->max('bobotkriteria') * 10;
+                    $min = 0;
+                    $range = $max - $min;
+
+                    if ($range == 0) {
+                        $normalizedValue = 0; // Handle kasus pembagian nol
+                    } else {
+                        $normalizedValue = ($criteria->jeniskriteria == 'benefit')
+                            ? ($nilai - $min) / $range
+                            : ($max - $nilai) / $range;
+                    }
+
+                    $normalized[$plant->idplant][$criteria->idkriteria] = $normalizedValue;
+                }
+            }
+
+            // Hitung utility
+            $utility = [];
+            $results = [];
+            foreach ($plants as $plant) {
+                $total = 0;
+                $details = [];
+
+                foreach ($criterias as $criteria) {
+                    $utilityValue = $normalized[$plant->idplant][$criteria->idkriteria]
+                        * $normalizedWeights[$criteria->idkriteria];
+
+                    $details[] = [
+                        'kriteria_id' => $criteria->idkriteria,
+                        'utility' => $utilityValue
+                    ];
+
+                    $total += $utilityValue;
+                    $utility[$plant->idplant][$criteria->idkriteria] = $utilityValue;
+                }
+
+                $results[$plant->idplant] = [
+                    'plant' => $plant,
+                    'total' => $total,
+                    'detail' => $details
+                ];
+            }
+
+            // 6. Ranking dengan handling tie score
+            $rankedResults = collect($results)
+                ->sortByDesc('total')
+                ->values()
+                ->map(function ($item, $index) {
+                    $item['rank'] = $index + 1;
+                    return $item;
+                })
+                ->all();
+
+            return view('rekomendasi.detail', [
+                'plants' => $plants,
+                'criterias' => $criterias,
+                'nilai' => $nilaiInput,
+                'normalizedWeights' => $normalizedWeights,
+                'normalized' => $normalized,
+                'utility' => $utility,
+                'results' => $results,
+                'rankedResults' => $rankedResults,
+                'breadcrumb' => (object) [
+                    'title' => 'Detail Perhitungan',
+                    'list' => ['Home', 'Rekomendasi', 'Detail']
+                ],
+                'activeMenu' => 'rekomendasi'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error in showDetail: ' . $e->getMessage(), [
+                'exception' => $e,
+                'session_data' => session()->all()
+            ]);
+
+            return redirect()->route('rekomendasi.select-plants')
+                ->with('error', 'Terjadi kesalahan sistem. Silakan coba lagi.');
+        }
+    }
+    // public function simpanRiwayat(Request $request)
+    // {
+    //     $request->validate([
+    //         'nama_perhitungan' => 'required|string|max:255'
+    //     ]);
+
+    //     PerhitunganHistory::create([
+    //         'nama_perhitungan' => $request->nama_perhitungan,
+    //         'data_plants' => PlantModel::whereIn('idplant', session('selected_plants'))->get()->toArray(),
+    //         'data_kriteria' => KriteriaModel::all()->toArray(),
+    //         'hasil_perhitungan' => session('calculation_results'),
+    //         'iduser' => auth()->id()
+    //     ]);
+
+    //     return redirect()->route('rekomendasi.riwayat')
+    //         ->with('success', 'Perhitungan berhasil disimpan ke riwayat');
+    // }
+
+    // public function showRiwayat()
+    // {
+    //     $breadcrumb = (object) [
+    //         'title' => 'Riwayat Perhitungan',
+    //         'list' => ['Home', 'Rekomendasi', 'Riwayat']
+    //     ];
+
+    //     $riwayat = PerhitunganHistory::where('iduser', auth()->id())
+    //         ->orderBy('created_at', 'desc')
+    //         ->get();
+
+    //     return view('rekomendasi.riwayat', [
+    //         'breadcrumb' => $breadcrumb,
+    //         'riwayat' => $riwayat,
+    //         'activeMenu' => 'riwayat'
+    //     ]);
+    // }
 }

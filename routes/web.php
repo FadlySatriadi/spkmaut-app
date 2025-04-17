@@ -66,5 +66,7 @@ Route::prefix('rekomendasi')->group(function () {
     Route::post('/store-plants', [RekomendasiController::class, 'storePlants'])->name('rekomendasi.store-plants');
     Route::get('/input-nilai', [RekomendasiController::class, 'inputNilai'])->name('rekomendasi.input-nilai');
     Route::post('/calculate', [RekomendasiController::class, 'calculate'])->name('rekomendasi.calculate');
-    Route::get('/detail-perhitungan', [RekomendasiController::class, 'showDetail'])->name('rekomendasi.detail');
+    Route::get('/detail', [RekomendasiController::class, 'showDetail'])->name('rekomendasi.detail');
+    Route::post('/simpan-riwayat', [RekomendasiController::class, 'simpanRiwayat'])->name('rekomendasi.simpan-riwayat');
+    Route::get('/riwayat', [RekomendasiController::class, 'showRiwayat'])->name('rekomendasi.riwayat');
 });

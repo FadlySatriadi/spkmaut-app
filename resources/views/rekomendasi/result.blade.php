@@ -1,13 +1,33 @@
 @extends('layouts.template')
 
+<style>
+    .bg-best-alternative {
+        background-color: #ffcce6;
+    }
+
+    .best-alternative {
+        position: relative;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(255, 204, 230, 0.3);
+    }
+    
+    .recommendation-text {
+        color: #800000;
+        font-weight: bold;
+    }
+    
+    /* Center align text in status column */
+    td:nth-child(5) {
+        text-align: center;
+        vertical-align: middle;
+    }
+</style>
+
 @section('content')
     <div class="container">
-        <h2>Hasil Rekomendasi</h2>
-
         <div class="card mb-4">
-            <div class="card-header">
-                <h4>Ranking Plant</h4>
-            </div>
             <div class="card-body">
                 <table class="table table-bordered">
                     <thead>
@@ -16,15 +36,23 @@
                             <th>Kode Alternatif</th>
                             <th>Nama Plant</th>
                             <th>Total Utility</th>
+                            <th class="text-center">Status</th> <!-- Added text-center class -->
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($results as $index => $result)
-                            <tr>
+                            <tr
+                                class="{{ $index === 0 ? 'bg-best-alternative' : '' }} 
+                                       {{ $index === 0 ? 'best-alternative' : '' }}">
                                 <td>{{ $index + 1 }}</td>
                                 <td>{{ $result['plant']->kodealternatif }}</td>
                                 <td>{{ $result['plant']->namaplant }}</td>
-                                <td>{{ number_format($result['total_utility'], 4) }}</td>   
+                                <td>{{ number_format($result['total_utility'], 4) }}</td>
+                                <td>
+                                    @if($index === 0)
+                                        <span class="recommendation-text">Direkomendasikan untuk ditutup</span>
+                                    @endif
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>
