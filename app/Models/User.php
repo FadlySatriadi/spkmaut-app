@@ -8,13 +8,18 @@ class User extends Authenticatable
 {
     protected $table = 'users'; // Sesuaikan dengan tabel Anda
     protected $primaryKey = 'iduser'; // Sesuaikan
-    
+
     protected $fillable = [
         'username',
         'nama',
         'password',
     ];
 
+    public function getNameAttribute()
+    {
+        return $this->attributes['nama'];
+    }
+    
     protected $hidden = [
         'password',
     ];

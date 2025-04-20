@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\PlantModel;
 use App\Models\KriteriaModel;
-use App\Models\PerhitunganHistory;
+use App\Models\HistoryModel;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Auth;
 
 class RekomendasiController extends Controller
 {
@@ -319,39 +321,115 @@ class RekomendasiController extends Controller
                 ->with('error', 'Terjadi kesalahan sistem. Silakan coba lagi.');
         }
     }
-    // public function simpanRiwayat(Request $request)
-    // {
-    //     $request->validate([
-    //         'nama_perhitungan' => 'required|string|max:255'
-    //     ]);
 
-    //     PerhitunganHistory::create([
-    //         'nama_perhitungan' => $request->nama_perhitungan,
-    //         'data_plants' => PlantModel::whereIn('idplant', session('selected_plants'))->get()->toArray(),
-    //         'data_kriteria' => KriteriaModel::all()->toArray(),
-    //         'hasil_perhitungan' => session('calculation_results'),
-    //         'iduser' => auth()->id()
-    //     ]);
+    protected function getDefaultRankedResults()
+    {
+        return session('calculation_results', []);
+    }
 
-    //     return redirect()->route('rekomendasi.riwayat')
-    //         ->with('success', 'Perhitungan berhasil disimpan ke riwayat');
-    // }
+    public function saveToCache(Request $request)
+    {
+        $user = Auth::user();
+        $cacheKey = 'user_' . $user->iduser . '_recommendation_history';
 
-    // public function showRiwayat()
-    // {
-    //     $breadcrumb = (object) [
-    //         'title' => 'Riwayat Perhitungan',
-    //         'list' => ['Home', 'Rekomendasi', 'Riwayat']
-    //     ];
+        $newEntry = [
+            'timestamp' => now()->timestamp,
+            'date' => now()->format('d M Y H:i'),
+            'user' => $user->nama,
+            'top_ranking' => [
+                'plant_code' => session('calculation_results')[0]['plant']->kodealternatif,
+                'plant_name' => session('calculation_results')[0]['plant']->namaplant,
+                'score' => session('calculation_results')[0]['total_utility']
+            ],
+            'all_data' => [
+                'results' => session('calculation_results'),
+                'criterias' => session('criterias'),
+                'input_values' => session('input_values'),
+                'normalized_weights' => session('normalized_weights'),
+                'normalized_values' => session('normalized_values'),
+                'utility_values' => session('utility_values'),
+                'ranked_results' => session('ranked_results') ?? session('calculation_results')
+            ]
+        ];
 
-    //     $riwayat = PerhitunganHistory::where('iduser', auth()->id())
-    //         ->orderBy('created_at', 'desc')
-    //         ->get();
+        $history = Cache::get($cacheKey, []);
+        array_unshift($history, $newEntry);
+        Cache::put($cacheKey, array_slice($history, 0, 20), now()->addDays(30));
 
-    //     return view('rekomendasi.riwayat', [
-    //         'breadcrumb' => $breadcrumb,
-    //         'riwayat' => $riwayat,
-    //         'activeMenu' => 'riwayat'
-    //     ]);
-    // }
+        return redirect()->route('rekomendasi.cache-history')
+            ->with('success', 'Rekomendasi berhasil disimpan di riwayat');
+    }
+
+    public function showCacheHistory()
+    {
+        $user = Auth::user();
+        $cacheKey = 'user_' . $user->iduser . '_recommendation_history';
+        $histories = Cache::get($cacheKey, []);
+
+        return view('rekomendasi.cache-history', [
+            'histories' => $histories,
+            'breadcrumb' => (object) [
+                'title' => 'Riwayat Rekomendasi',
+                'list' => ['Home', 'Riwayat']
+            ],
+            'activeMenu' => 'history'
+        ]);
+    }
+
+    public function showCacheHistoryDetail($timestamp)
+    {
+        $user = Auth::user();
+        $cacheKey = 'user_' . $user->iduser . '_recommendation_history';
+        $histories = Cache::get($cacheKey, []);
+
+        $selectedHistory = collect($histories)->firstWhere('timestamp', $timestamp);
+
+        if (!$selectedHistory) {
+            abort(404, 'Riwayat tidak ditemukan');
+        }
+
+        $allData = $selectedHistory['all_data'];
+
+        // Rekonstruksi data untuk tampilan detail
+        $plants = collect($allData['results'])->map(function ($result) {
+            return $result['plant'];
+        });
+
+        $criterias = collect($allData['criterias']);
+
+        return view('rekomendasi.cache-history-detail', [
+            'history' => $selectedHistory,
+            'plants' => $plants,
+            'criterias' => $criterias,
+            'nilai' => $allData['input_values'] ?? [],
+            'normalizedWeights' => $allData['normalized_weights'] ?? [],
+            'normalized' => $allData['normalized_values'] ?? [],
+            'utility' => $allData['utility_values'] ?? [],
+            'results' => $allData['results'] ?? [],
+            'rankedResults' => $allData['ranked_results'] ?? $allData['results'] ?? [],
+            'breadcrumb' => (object) [
+                'title' => 'Detail Riwayat',
+                'list' => ['Home', 'Riwayat', 'Detail']
+            ],
+            'activeMenu' => 'history'
+        ]);
+    }
+
+    public function deleteHistory($timestamp)
+    {
+        $user = Auth::user();
+        $cacheKey = 'user_' . $user->iduser . '_recommendation_history';
+        $histories = Cache::get($cacheKey, []);
+
+        // Filter out the history to be deleted
+        $updatedHistories = array_filter($histories, function ($history) use ($timestamp) {
+            return $history['timestamp'] != $timestamp;
+        });
+
+        // Save back to cache
+        Cache::put($cacheKey, $updatedHistories, now()->addDays(30));
+
+        return redirect()->route('rekomendasi.cache-history')
+            ->with('success', 'Riwayat berhasil dihapus');
+    }
 }

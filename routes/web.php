@@ -61,12 +61,25 @@ Route::group(['prefix' => 'alternatif'], function () {
     Route::delete('/{id}', [AlternatifController::class, 'destroy']);
 });
 
-Route::prefix('rekomendasi')->group(function () {
-    Route::get('/select-plants', [RekomendasiController::class, 'selectPlants'])->name('rekomendasi.select-plants');
-    Route::post('/store-plants', [RekomendasiController::class, 'storePlants'])->name('rekomendasi.store-plants');
-    Route::get('/input-nilai', [RekomendasiController::class, 'inputNilai'])->name('rekomendasi.input-nilai');
-    Route::post('/calculate', [RekomendasiController::class, 'calculate'])->name('rekomendasi.calculate');
-    Route::get('/detail', [RekomendasiController::class, 'showDetail'])->name('rekomendasi.detail');
-    Route::post('/simpan-riwayat', [RekomendasiController::class, 'simpanRiwayat'])->name('rekomendasi.simpan-riwayat');
-    Route::get('/riwayat', [RekomendasiController::class, 'showRiwayat'])->name('rekomendasi.riwayat');
+Route::middleware(['auth'])->group(function () {
+    Route::prefix('rekomendasi')->group(function () {
+        Route::get('/select-plants', [RekomendasiController::class, 'selectPlants'])->name('rekomendasi.select-plants');
+        Route::post('/store-plants', [RekomendasiController::class, 'storePlants'])->name('rekomendasi.store-plants');
+        Route::get('/input-nilai', [RekomendasiController::class, 'inputNilai'])->name('rekomendasi.input-nilai');
+        Route::post('/calculate', [RekomendasiController::class, 'calculate'])->name('rekomendasi.calculate');
+        Route::get('/detail', [RekomendasiController::class, 'showDetail'])->name('rekomendasi.detail');
+        Route::post('/save-recommendation', [RekomendasiController::class, 'saveRecommendation'])->name('rekomendasi.save');
+    });
+
+    // Route history
+    Route::post('/recommendation/save-cache', [RekomendasiController::class, 'saveToCache'])
+        ->name('rekomendasi.save-cache');
+
+    Route::get('/recommendation/cache-history', [RekomendasiController::class, 'showCacheHistory'])
+        ->name('rekomendasi.cache-history');
+
+    Route::get('/recommendation/cache-history/{timestamp}', [RekomendasiController::class, 'showCacheHistoryDetail'])
+        ->name('rekomendasi.cache-history.detail');
+    Route::delete('/recommendation/cache-history/{timestamp}', [RekomendasiController::class, 'deleteHistory'])
+        ->name('rekomendasi.cache-history.delete');
 });

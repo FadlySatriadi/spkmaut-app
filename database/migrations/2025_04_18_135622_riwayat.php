@@ -13,11 +13,10 @@ return new class extends Migration
     {
         Schema::create('riwayat', function (Blueprint $table) {
             $table->id();
-            $table->string('nama_perhitungan');
-            $table->json('data_plants');
-            $table->json('data_kriteria');
-            $table->json('hasil_perhitungan');
             $table->foreignId('iduser')->constrained('users', 'iduser')->onDelete('cascade');
+            $table->dateTime('calculation_date');
+            $table->json('ranking_data');
+            $table->json('calculation_details');
             $table->timestamps();
         });
     }

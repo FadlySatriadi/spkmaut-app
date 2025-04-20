@@ -127,13 +127,19 @@
                                 <p>Penilaian</p>
                             </a>
                         </li>
+                        <li class="nav-item">
+                            <a href="{{ route('rekomendasi.cache-history') }}" class="nav-link">
+                                <i class="nav-icon fas fa-history"></i>
+                                <p>History</p>
+                            </a>
+                        </li>
                     </ul>
                 </nav>
                 <div class="sidebar-footer p-2" style="border-top: 1px solid rgba(255,255,255,0.1);">
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" class="btn btn-block text-left nav-link" 
-                                style="color: #ffffff; background: transparent; border: none; padding: 0.5rem 1rem;">
+                        <button type="submit" class="btn btn-block text-left nav-link"
+                            style="color: #ffffff; background: transparent; border: none; padding: 0.5rem 1rem;">
                             <i class="nav-icon fas fa-sign-out-alt"></i>
                             <p style="display: inline;">Logout</p>
                         </button>

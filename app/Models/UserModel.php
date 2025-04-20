@@ -14,6 +14,11 @@ class User extends Authenticatable
         'password',
     ];
 
+    public function getNameAttribute()
+    {
+        return $this->attributes['nama'];
+    }
+
     protected $hidden = [
         'password',
     ];

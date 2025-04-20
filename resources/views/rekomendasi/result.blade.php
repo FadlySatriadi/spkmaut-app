@@ -60,6 +60,12 @@
             </div>
         </div>
         <div class="mt-4">
+            <form action="{{ route('rekomendasi.save-cache') }}" method="POST">
+                @csrf
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save"></i> Simpan ke Riwayat Cache
+                </button>
+            </form>
             <a href="{{ route('rekomendasi.detail') }}" class="btn btn-primary">
                 <i class="fas fa-calculator"></i> Lihat Detail Perhitungan Lengkap
             </a>
