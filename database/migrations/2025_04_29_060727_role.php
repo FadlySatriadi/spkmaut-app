@@ -17,7 +17,6 @@ return new class extends Migration
             $table->string('namarole', 50); // admin, officer, dll
             $table->timestamps();
         });
-        
     }
 
     /**

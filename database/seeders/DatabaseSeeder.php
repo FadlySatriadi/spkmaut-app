@@ -23,6 +23,8 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             AubSeeder::class,
             PlantSeeder::class,
+            OfficerSeeder::class,
+            AdminSeeder::class,
             
             // 2. Seeder untuk data referensi
             KriteriaSeeder::class,

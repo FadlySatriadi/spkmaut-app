@@ -128,7 +128,8 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ route('rekomendasi.cache-history') }}" class="nav-link">
+                            <a href="{{ url('rekomendasi/cache-history') }}" 
+                                class="nav-link {{ $activeMenu == 'history' ? 'active' : '' }}"">
                                 <i class="nav-icon fas fa-history"></i>
                                 <p>History</p>
                             </a>

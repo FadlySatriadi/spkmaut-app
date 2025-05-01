@@ -28,12 +28,11 @@
         }
 
         .login-box {
-            width: 475px;  
+            width: 475px;
             position: absolute;
             right: 150px;
             bottom: 120px;
-            transform: translateY(-50%)
-            animation: fadeInRight 1s ease-out;
+            transform: translateY(-50%) animation: fadeInRight 1s ease-out;
         }
 
         .card {
@@ -99,10 +98,12 @@
                 <form method="POST" action="{{ route('proses_login') }}">
                     @csrf
                     <div class="input-group mb-3">
-                        <input type="text" class="form-control" style="border: 2px solid #800000;" name="username" placeholder="Username">
+                        <input type="text" class="form-control" style="border: 2px solid #800000;" name="username"
+                            placeholder="Username">
                     </div>
                     <div class="input-group mb-3">
-                        <input type="password" class="form-control" style="border: 2px solid #800000;" name="password" placeholder="Password">
+                        <input type="password" class="form-control" style="border: 2px solid #800000;" name="password"
+                            placeholder="Password">
                     </div>
                     <div class="row">
                         <div class="col-8">
@@ -115,7 +116,8 @@
                         </div>
                         <!-- /.col -->
                         <div class="col-4">
-                            <button type="submit" class="btn btn-primary btn-block" style="font-weight: bold;">LOGIN</button>
+                            <button type="submit" class="btn btn-primary btn-block"
+                                style="font-weight: bold;">LOGIN</button>
                         </div>
                         <!-- /.col -->
                     </div>

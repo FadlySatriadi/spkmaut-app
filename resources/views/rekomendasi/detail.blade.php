@@ -29,9 +29,10 @@
             color: #800000;
             font-weight: bold;
         }
+
         .bg-best-alternative {
-        background-color: #ffcce6;
-    }
+            background-color: #ffcce6;
+        }
     </style>
     <div class="container">
 
@@ -189,6 +190,7 @@
                         <tr>
                             <th>Ranking</th>
                             <th>Kode Alternatif</th>
+                            <th>AUB</th>
                             <th>Nama Plant</th>
                             <th>Total Utility</th>
                             <th class="text-center">Status</th>
@@ -201,6 +203,7 @@
                                {{ $index === 0 ? 'best-alternative' : '' }}">
                                 <td>{{ $index + 1 }}</td>
                                 <td>{{ $result['plant']->kodealternatif }}</td>
+                                <td>{{ $result['plant']->aub->namaaub }}</td>
                                 <td>{{ $result['plant']->namaplant }}</td>
                                 <td>{{ number_format($result['total'], 5) }}</td>
                                 <td>
@@ -215,9 +218,28 @@
             </div>
         </div>
 
+        <div class="alert alert-info mb-4" style="text-align: center">
+            <i class="fas fa-info-circle"></i> Berdasarkan hasil perhitungan yang dilakukan menggunakan metode <em>Multi
+                Attribute Utility Theory</em> didapat hasil bahwa Batching Plant
+            <strong>"{{ $topPlant['plant']->namaplant ?? 'N/A' }}"</strong> dari
+            <strong>{{ $topPlant['plant']->aub->namaaub ?? 'N/A' }}</strong>
+            direkomendasikan untuk <strong>DITUTUP.</strong> Segala
+            bentuk pengambilan keputusan sepenuhnya tetap berada dalam wewenang stakeholder terkait.
+        </div>
+
         <div class="mt-4">
-            {{-- <a href="{{ route('rekomendasi.index') }}" class="btn btn-secondary"> --}}
-            <i class="fas fa-arrow-left"></i> Kembali
+            {{-- <a href="{{ route('rekomendasi.result') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Kembali
+            </a> --}}
+            <form action="{{ route('rekomendasi.save-cache') }}" method="POST">
+                @csrf
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save"></i> Simpan ke Riwayat
+                </button>
+            </form>
+            <a href="{{ route('rekomendasi.cetak') }}" class="btn btn-primary"
+                style="background-color: #800000; color: white; border: 1px solid #800000;">
+                <i class="fas fa-print"></i> Cetak PDF
             </a>
         </div>
     </div>

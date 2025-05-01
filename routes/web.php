@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\AubController;
@@ -10,7 +9,7 @@ use App\Http\Controllers\AlternatifController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\RekomendasiController;
 
-// Route untuk guest (tanpa auth)
+
 Route::get('login', [AuthController::class, 'index'])->name('login');
 Route::post('proses_login', [AuthController::class, 'proses_login'])->name('proses_login');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
@@ -74,10 +73,13 @@ Route::middleware(['auth'])->group(function () {
     // Route history
     Route::post('/recommendation/save-cache', [RekomendasiController::class, 'saveToCache'])
         ->name('rekomendasi.save-cache');
+    Route::get('/rekomendasi/cetak', [RekomendasiController::class, 'cetakpdf'])
+        ->name('rekomendasi.cetak')
+        ->middleware('auth');
 
     Route::get('/recommendation/cache-history', [RekomendasiController::class, 'showCacheHistory'])
         ->name('rekomendasi.cache-history');
-
+    Route::get('/rekomendasi/history/{timestamp}/print', [RekomendasiController::class, 'printHistory'])->name('rekomendasi.print-history');
     Route::get('/recommendation/cache-history/{timestamp}', [RekomendasiController::class, 'showCacheHistoryDetail'])
         ->name('rekomendasi.cache-history.detail');
     Route::delete('/recommendation/cache-history/{timestamp}', [RekomendasiController::class, 'deleteHistory'])

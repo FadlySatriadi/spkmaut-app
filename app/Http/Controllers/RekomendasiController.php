@@ -9,35 +9,10 @@ use App\Models\HistoryModel;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Auth;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class RekomendasiController extends Controller
 {
-    // /**
-    //  * Menampilkan form pemilihan alternatif dan input nilai
-    //  */
-    // public function index()
-    // {
-    //     $breadcrumb = (object) [
-    //         'title' => 'Rekomendasi',
-    //         'list' => ['Home', 'Rekomendasi']
-    //     ];
-
-    //     $plants = PlantModel::where('status', 'aktif')->get();
-    //     $criterias = KriteriaModel::orderBy('kodekriteria', 'asc')->get();
-
-    //     $activeMenu = 'alternatif';
-
-    //     return view('rekomendasi.index', [
-    //         'breadcrumb' => $breadcrumb,
-    //         'plants' => $plants,
-    //         'criterias' => $criterias,
-    //         'activeMenu' => $activeMenu
-    //     ]);
-    // }
-
-    /**
-     * Menghitung rekomendasi berdasarkan input
-     */
     public function calculate(Request $request)
     {
 
@@ -46,7 +21,7 @@ class RekomendasiController extends Controller
             'list' => ['Home', 'Rekomendasi', 'Pilih Plant']
         ];
 
-        $activeMenu = 'alternatif';
+        $activeMenu = 'rekomendasi';
 
         // Validasi
         $validated = $request->validate([
@@ -113,8 +88,7 @@ class RekomendasiController extends Controller
                     'kode' => $criteria->kodekriteria,
                     'nama' => $criteria->namakriteria,
                     'jenis' => $criteria->jeniskriteria,
-                    'nilai' => $nilai,
-                    'nilai' => $nilaiInput,
+                    'nilai_input' => $nilai, // Ubah key ini
                     'normalized' => $normalizedValue,
                     'bobot' => $normalizedWeights[$criteria->idkriteria],
                     'utility' => $weightedUtility
@@ -148,7 +122,7 @@ class RekomendasiController extends Controller
             'list' => ['Home', 'Rekomendasi', 'Pilih Plant']
         ];
 
-        $activeMenu = 'alternatif';
+        $activeMenu = 'rekomendasi';
 
         $plants = PlantModel::where('status', 'aktif')->get();
 
@@ -179,7 +153,7 @@ class RekomendasiController extends Controller
             'list' => ['Home', 'Rekomendasi', 'Form Penilaian Plant']
         ];
 
-        $activeMenu = 'alternatif';
+        $activeMenu = 'rekomendasi';
 
         // Ambil dari session
         $plantIds = session('selected_plants');
@@ -296,6 +270,9 @@ class RekomendasiController extends Controller
                 })
                 ->all();
 
+            // Ambil plant dengan ranking 1
+            $topPlant = $rankedResults[0] ?? null;
+            $activeMenu = 'rekomendasi';
             return view('rekomendasi.detail', [
                 'plants' => $plants,
                 'criterias' => $criterias,
@@ -304,6 +281,7 @@ class RekomendasiController extends Controller
                 'normalized' => $normalized,
                 'utility' => $utility,
                 'results' => $results,
+                'topPlant' => $topPlant,
                 'rankedResults' => $rankedResults,
                 'breadcrumb' => (object) [
                     'title' => 'Detail Perhitungan',
@@ -332,29 +310,46 @@ class RekomendasiController extends Controller
         $user = Auth::user();
         $cacheKey = 'user_' . $user->iduser . '_recommendation_history';
 
+        // Validasi data sebelum menyimpan
+        $calculationResults = session('calculation_results', []);
+        if (!is_array($calculationResults)) {
+            Log::error('Invalid calculation results format', ['results' => $calculationResults]);
+            return back()->with('error', 'Format data perhitungan tidak valid');
+        }
+
+        // Pastikan ada data plant
+        if (empty($calculationResults) || !isset($calculationResults[0]['plant'])) {
+            return back()->with('error', 'Data plant tidak ditemukan');
+        }
+
         $newEntry = [
             'timestamp' => now()->timestamp,
             'date' => now()->format('d M Y H:i'),
             'user' => $user->nama,
             'top_ranking' => [
-                'plant_code' => session('calculation_results')[0]['plant']->kodealternatif,
-                'plant_name' => session('calculation_results')[0]['plant']->namaplant,
-                'score' => session('calculation_results')[0]['total_utility']
+                'plant_code' => $calculationResults[0]['plant']->kodealternatif,
+                'plant_name' => $calculationResults[0]['plant']->namaplant,
+                'score' => $calculationResults[0]['total_utility'] ?? 0
             ],
             'all_data' => [
-                'results' => session('calculation_results'),
-                'criterias' => session('criterias'),
-                'input_values' => session('input_values'),
-                'normalized_weights' => session('normalized_weights'),
-                'normalized_values' => session('normalized_values'),
-                'utility_values' => session('utility_values'),
-                'ranked_results' => session('ranked_results') ?? session('calculation_results')
+                'results' => $calculationResults,
+                'criterias' => session('criterias', []),
+                'input_values' => session('input_values', []),
+                'utility_values' => session('utility_values', [])
             ]
         ];
 
-        $history = Cache::get($cacheKey, []);
-        array_unshift($history, $newEntry);
-        Cache::put($cacheKey, array_slice($history, 0, 20), now()->addDays(30));
+        // Ambil data yang sudah ada
+        $existingHistories = Cache::get($cacheKey, []);
+        if (!is_array($existingHistories)) {
+            $existingHistories = [];
+        }
+
+        // Tambahkan entry baru
+        array_unshift($existingHistories, $newEntry);
+
+        // Simpan ke cache
+        Cache::put($cacheKey, array_slice($existingHistories, 0, 20), now()->addDays(30));
 
         return redirect()->route('rekomendasi.cache-history')
             ->with('success', 'Rekomendasi berhasil disimpan di riwayat');
@@ -362,9 +357,18 @@ class RekomendasiController extends Controller
 
     public function showCacheHistory()
     {
+        $activeMenu = 'history';
         $user = Auth::user();
         $cacheKey = 'user_' . $user->iduser . '_recommendation_history';
+
+        // Pastikan selalu mengembalikan array
         $histories = Cache::get($cacheKey, []);
+
+        // Validasi data
+        if (!is_array($histories)) {
+            Log::error('Invalid history data format', ['histories' => $histories]);
+            $histories = [];
+        }
 
         return view('rekomendasi.cache-history', [
             'histories' => $histories,
@@ -378,41 +382,208 @@ class RekomendasiController extends Controller
 
     public function showCacheHistoryDetail($timestamp)
     {
-        $user = Auth::user();
-        $cacheKey = 'user_' . $user->iduser . '_recommendation_history';
-        $histories = Cache::get($cacheKey, []);
+        try {
+            $user = Auth::user();
+            $cacheKey = 'user_' . $user->iduser . '_recommendation_history';
+            $histories = Cache::get($cacheKey, []);
 
-        $selectedHistory = collect($histories)->firstWhere('timestamp', $timestamp);
+            // Validasi data history
+            if (!is_array($histories)) {
+                throw new \Exception("Format data cache tidak valid");
+            }
 
-        if (!$selectedHistory) {
-            abort(404, 'Riwayat tidak ditemukan');
+            // Cari history berdasarkan timestamp
+            $historyData = collect($histories)->firstWhere('timestamp', (int)$timestamp);
+
+            if (!$historyData || !isset($historyData['all_data'])) {
+                return redirect()->route('rekomendasi.history')
+                    ->with('error', 'Data riwayat tidak ditemukan atau format tidak valid');
+            }
+
+            // Rekonstruksi data dari cache
+            $allData = $historyData['all_data'];
+
+            // Validasi data penting
+            if (!isset($allData['input_values'], $allData['results'])) {
+                throw new \Exception("Data penting tidak ditemukan dalam cache");
+            }
+
+            $plantIds = array_keys($allData['input_values']);
+            $plants = PlantModel::whereIn('idplant', $plantIds)->get();
+
+            if ($plants->isEmpty()) {
+                throw new \Exception("Data plant tidak ditemukan");
+            }
+
+            $criterias = KriteriaModel::orderByRaw('LENGTH(kodekriteria), kodekriteria')->get();
+
+            if ($criterias->isEmpty()) {
+                throw new \Exception("Data kriteria tidak ditemukan");
+            }
+
+            // Inisialisasi variabel
+            $nilai = $allData['input_values'];
+            $normalizedWeights = [];
+            $normalized = [];
+            $utility = [];
+            $results = [];
+
+            // Hitung total bobot kriteria
+            $totalBobot = $criterias->sum('bobotkriteria');
+
+            if ($totalBobot <= 0) {
+                throw new \Exception("Total bobot kriteria tidak valid");
+            }
+
+            // Normalisasi bobot kriteria (sama seperti di showDetail)
+            foreach ($criterias as $criteria) {
+                $normalizedWeights[$criteria->idkriteria] = $criteria->bobotkriteria / $totalBobot;
+            }
+
+            // Normalisasi nilai (menggunakan logika dari showDetail)
+            foreach ($plants as $plant) {
+                foreach ($criterias as $criteria) {
+                    $nilaiInput = $nilai[$plant->idplant][$criteria->idkriteria] ?? 0;
+
+                    // PERUBAHAN PENTING: Gunakan cara perhitungan yang sama dengan showDetail
+                    $max = $criterias->where('kodekriteria', $criteria->kodekriteria)->max('bobotkriteria') * 10;
+                    $min = 0;
+                    $range = $max - $min;
+
+                    if ($range == 0) {
+                        $normalizedValue = 0; // Handle kasus pembagian nol
+                    } else {
+                        $normalizedValue = ($criteria->jeniskriteria == 'benefit')
+                            ? ($nilaiInput - $min) / $range
+                            : ($max - $nilaiInput) / $range;
+                    }
+
+                    $normalized[$plant->idplant][$criteria->idkriteria] = $normalizedValue;
+                }
+            }
+
+            // Hitung utility (sama seperti di showDetail)
+            foreach ($plants as $plant) {
+                $total = 0;
+                $details = [];
+
+                foreach ($criterias as $criteria) {
+                    $utilityValue = $normalized[$plant->idplant][$criteria->idkriteria]
+                        * $normalizedWeights[$criteria->idkriteria];
+
+                    $details[] = [
+                        'kriteria_id' => $criteria->idkriteria,
+                        'utility' => $utilityValue
+                    ];
+
+                    $total += $utilityValue;
+                    $utility[$plant->idplant][$criteria->idkriteria] = $utilityValue;
+                }
+
+                $results[$plant->idplant] = [
+                    'plant' => $plant,
+                    'total' => $total,
+                    'detail' => $details
+                ];
+            }
+
+            // Ranking dengan cara yang sama seperti di showDetail
+            $rankedResults = collect($results)
+                ->sortByDesc('total')
+                ->values()
+                ->map(function ($item, $index) {
+                    $item['rank'] = $index + 1;
+                    return $item;
+                })
+                ->all();
+
+            return view('rekomendasi.cache-history-detail', [
+                'historyData' => $historyData,
+                'plants' => $plants,
+                'criterias' => $criterias,
+                'nilai' => $nilai,
+                'normalizedWeights' => $normalizedWeights,
+                'normalized' => $normalized,
+                'utility' => $utility,
+                'results' => $results,
+                'rankedResults' => $rankedResults,
+                'breadcrumb' => (object) [
+                    'title' => 'Detail Riwayat Perhitungan',
+                    'list' => ['Home', 'Rekomendasi', 'Riwayat', 'Detail']
+                ],
+                'timestamp' => $timestamp,
+                'activeMenu' => 'history'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error in showCacheHistoryDetail: ' . $e->getMessage(), [
+                'exception' => $e,
+                'timestamp' => $timestamp,
+                'user' => Auth::id()
+            ]);
+
+            return redirect()->route('rekomendasi.cache-history')
+                ->with('error', 'Terjadi kesalahan saat memuat data riwayat: ' . $e->getMessage());
+        }
+    }
+
+    protected function calculateCriteriaRanges($criterias, $plants, $nilai)
+    {
+        $ranges = [];
+
+        foreach ($criterias as $criteria) {
+            $values = [];
+            foreach ($plants as $plant) {
+                if (isset($nilai[$plant->idplant][$criteria->idkriteria])) {
+                    $values[] = $nilai[$plant->idplant][$criteria->idkriteria];
+                }
+            }
+
+            // Handle ketika tidak ada nilai
+            if (empty($values)) {
+                $ranges[$criteria->idkriteria] = [
+                    'min' => 0,
+                    'max' => 0,
+                    'type' => $criteria->jeniskriteria // Tambahkan type ke range
+                ];
+                continue;
+            }
+
+            $ranges[$criteria->idkriteria] = [
+                'min' => min($values),
+                'max' => max($values),
+                'type' => $criteria->jeniskriteria // Tambahkan type ke range
+            ];
         }
 
-        $allData = $selectedHistory['all_data'];
+        return $ranges;
+    }
 
-        // Rekonstruksi data untuk tampilan detail
-        $plants = collect($allData['results'])->map(function ($result) {
-            return $result['plant'];
-        });
+    protected function calculateNormalizedValue($value, $min, $max, $type)
+    {
+        $range = $max - $min;
 
-        $criterias = collect($allData['criterias']);
+        // Handle ketika semua nilai sama
+        if ($range == 0) {
+            return $type == 'benefit' ? 1 : 0; // Atau nilai default lainnya
+        }
 
-        return view('rekomendasi.cache-history-detail', [
-            'history' => $selectedHistory,
-            'plants' => $plants,
-            'criterias' => $criterias,
-            'nilai' => $allData['input_values'] ?? [],
-            'normalizedWeights' => $allData['normalized_weights'] ?? [],
-            'normalized' => $allData['normalized_values'] ?? [],
-            'utility' => $allData['utility_values'] ?? [],
-            'results' => $allData['results'] ?? [],
-            'rankedResults' => $allData['ranked_results'] ?? $allData['results'] ?? [],
-            'breadcrumb' => (object) [
-                'title' => 'Detail Riwayat',
-                'list' => ['Home', 'Riwayat', 'Detail']
-            ],
-            'activeMenu' => 'history'
-        ]);
+        return $type == 'benefit'
+            ? ($value - $min) / $range
+            : ($max - $value) / $range;
+    }
+
+    protected function getUtilityDetails($criterias, $utility, $plantId)
+    {
+        $details = [];
+
+        foreach ($criterias as $criteria) {
+            $details[] = [
+                'kriteria_id' => $criteria->idkriteria,
+                'utility' => $utility[$plantId][$criteria->idkriteria] ?? 0
+            ];
+        }
+
+        return $details;
     }
 
     public function deleteHistory($timestamp)
@@ -431,5 +602,99 @@ class RekomendasiController extends Controller
 
         return redirect()->route('rekomendasi.cache-history')
             ->with('success', 'Riwayat berhasil dihapus');
+    }
+
+    public function cetakpdf()
+    {
+        // Ambil data dari session
+        $results = session('calculation_results', []);
+
+        // Validasi data
+        if (empty($results)) {
+            return redirect()->back()
+                ->with('error', 'Tidak ada data perhitungan untuk dicetak');
+        }
+
+        // Urutkan hasil
+        usort($results, function ($a, $b) {
+            return ($b['total_utility'] ?? 0) <=> ($a['total_utility'] ?? 0);
+        });
+
+        // Tambahkan ranking dan ambil plant teratas
+        $rankedResults = array_map(function ($item, $index) {
+            $item['rank'] = $index + 1;
+            return $item;
+        }, $results, array_keys($results));
+
+        $topPlant = $rankedResults[0] ?? null;
+
+        // Data tambahan untuk header
+        $data = [
+            'results' => $results,
+            'topPlant' => $topPlant,
+            'tanggal' => now()->format('d F Y'),
+            'user' => Auth::user()->nama
+        ];
+
+        // Generate PDF
+        $pdf = Pdf::loadView('rekomendasi.cetak', $data);
+
+        $pdf->setOption('defaultFont', 'Poppins');
+        $pdf->setOption('isRemoteEnabled', true);
+        $pdf->setOption('isHtml5ParserEnabled', true);
+
+        return $pdf->download('Rekomendasi Penutupan Plant.pdf');
+    }
+
+    public function printHistory($timestamp)
+    {
+        // Ambil data dari cache
+        $user = Auth::user();
+        $cacheKey = 'user_' . $user->iduser . '_recommendation_history';
+        $histories = Cache::get($cacheKey, []);
+
+        // Cari history yang dipilih
+        $selectedHistory = collect($histories)->firstWhere('timestamp', (int)$timestamp);
+
+        // Validasi data
+        if (!$selectedHistory || !isset($selectedHistory['all_data']['results'])) {
+            return redirect()->back()
+                ->with('error', 'Data riwayat tidak ditemukan atau tidak valid');
+        }
+
+        // Ambil dan urutkan hasil
+        $results = $selectedHistory['all_data']['results'];
+
+        // Urutkan berdasarkan total_utility (descending)
+        usort($results, function ($a, $b) {
+            return ($b['total_utility'] ?? 0) <=> ($a['total_utility'] ?? 0);
+        });
+
+        // Tambahkan ranking
+        $rankedResults = array_map(function ($item, $index) {
+            $item['rank'] = $index + 1;
+            return $item;
+        }, $results, array_keys($results));
+
+        // Ambil plant teratas
+        $topplant = $rankedResults[0] ?? null;
+
+        // Data untuk PDF
+        $data = [
+            'results' => $results,
+            'tanggal' => $selectedHistory['date'] ?? now()->format('d F Y'),
+            'user' => $selectedHistory['user'] ?? 'Unknown',
+            'topplant' => $topplant,
+            'top_score' => number_format($selectedHistory['top_ranking']['score'] ?? 0, 4)
+        ];
+
+        // Generate PDF
+        $pdf = Pdf::loadView('rekomendasi.cetak-history', $data);
+
+        $pdf->setOption('defaultFont', 'Poppins');
+        $pdf->setOption('isRemoteEnabled', true);
+        $pdf->setOption('isHtml5ParserEnabled', true);
+
+        return $pdf->download('Rekomendasi-History-' . $timestamp . '.pdf');
     }
 }

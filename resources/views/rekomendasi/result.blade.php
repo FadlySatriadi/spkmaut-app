@@ -32,10 +32,10 @@
                 <table class="table table-bordered">
                     <thead>
                         <tr>
-                            <th>Rank</th>
-                            <th>Kode Alternatif</th>
-                            <th>Nama Plant</th>
-                            <th>Total Utility</th>
+                            <th class="text-center">Rank</th>
+                            <th class="text-center">Kode Alternatif</th>
+                            <th class="text-center">Nama Plant</th>
+                            <th class="text-center">Total Utility</th>
                             <th class="text-center">Status</th> <!-- Added text-center class -->
                         </tr>
                     </thead>
@@ -44,10 +44,10 @@
                             <tr
                                 class="{{ $index === 0 ? 'bg-best-alternative' : '' }} 
                                        {{ $index === 0 ? 'best-alternative' : '' }}">
-                                <td>{{ $index + 1 }}</td>
-                                <td>{{ $result['plant']->kodealternatif }}</td>
-                                <td>{{ $result['plant']->namaplant }}</td>
-                                <td>{{ number_format($result['total_utility'], 4) }}</td>
+                                <td class="text-center">{{ $index + 1 }}</td>
+                                <td class="text-center">{{ $result['plant']->kodealternatif }}</td>
+                                <td class="text-center">{{ $result['plant']->namaplant }}</td>
+                                <td class="text-center">{{ number_format($result['total_utility'], 4) }}</td>
                                 <td>
                                     @if($index === 0)
                                         <span class="recommendation-text">Direkomendasikan untuk ditutup</span>
@@ -63,14 +63,16 @@
             <form action="{{ route('rekomendasi.save-cache') }}" method="POST">
                 @csrf
                 <button type="submit" class="btn btn-success">
-                    <i class="fas fa-save"></i> Simpan ke Riwayat Cache
+                    <i class="fas fa-save"></i> Simpan ke Riwayat
                 </button>
             </form>
             <a href="{{ route('rekomendasi.detail') }}" class="btn btn-primary">
-                <i class="fas fa-calculator"></i> Lihat Detail Perhitungan Lengkap
+                <i class="fas fa-calculator"></i> Lihat Detail Perhitungan
+            </a>
+            <a href="{{ route('rekomendasi.cetak') }}" class="btn btn-primary">
+                <i class="fas fa-calculator"></i> Cetak PDF
             </a>
         </div>
-        {{-- <a href="{{ route('rekomendasi.index') }}" class="btn btn-secondary">Kembali</a> --}}
     </div>
 
     @push('scripts')

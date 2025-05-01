@@ -32,16 +32,14 @@ class AuthController extends Controller
         ]);
     }
 
-    // Logout
-    // AuthController.php
-public function logout(Request $request)
-{
-    Auth::logout(); // Menghapus session auth
- 
-    $request->session()->invalidate(); // Invalidasi session
- 
-    $request->session()->regenerateToken(); // Regenerasi CSRF token
- 
-    return redirect('/login')->with('success', 'Anda telah logout');
-}
+    public function logout(Request $request)
+    {
+        Auth::logout(); // Menghapus session auth
+
+        $request->session()->invalidate(); // Invalidasi session
+
+        $request->session()->regenerateToken(); // Regenerasi CSRF token
+
+        return redirect('/login')->with('success', 'Anda telah logout');
+    }
 }
