@@ -12,9 +12,15 @@ class User extends Authenticatable
     protected $fillable = [
         'username',
         'nama',
+        'role',
         'password',
     ];
 
+    public function role()
+    {
+        return $this->belongsTo(Role::class, 'role_id', 'idrole');
+    }
+    
     public function getNameAttribute()
     {
         return $this->attributes['nama'];

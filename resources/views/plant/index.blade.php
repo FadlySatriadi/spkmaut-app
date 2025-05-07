@@ -101,12 +101,13 @@
                             <a class="page-link" href="{{ $plant->previousPageUrl() }}" rel="prev">&laquo;</a>
                         </li>
                     @endif
-            
+
                     {{-- Pagination Elements --}}
                     @foreach ($plant->getUrlRange(1, $plant->lastPage()) as $page => $url)
                         @if ($page == $plant->currentPage())
                             <li class="page-item active">
-                                <span class="page-link" style="background-color: #800000; border-color: #800000;">{{ $page }}</span>
+                                <span class="page-link"
+                                    style="background-color: #800000; border-color: #800000;">{{ $page }}</span>
                             </li>
                         @else
                             <li class="page-item">
@@ -114,7 +115,7 @@
                             </li>
                         @endif
                     @endforeach
-            
+
                     {{-- Next Page Link --}}
                     @if ($plant->hasMorePages())
                         <li class="page-item">
@@ -127,24 +128,26 @@
                     @endif
                 </ul>
             </div>
-            
+
             <style>
                 /* Custom Pagination Styles */
                 .page-item.active .page-link {
                     background-color: #800000 !important;
                     border-color: #800000 !important;
                 }
+
                 .page-link {
                     color: #800000;
                 }
+
                 .page-link:hover {
                     color: #600000;
                 }
+
                 .page-item.disabled .page-link {
                     color: #6c757d;
                 }
             </style>
         </div>
-    </div>
     </div>
 @endsection

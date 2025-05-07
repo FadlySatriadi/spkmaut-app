@@ -5,10 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\PlantModel;
 use App\Models\AubModel;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use App\DataTables\AubDataTable;
-use Illuminate\Support\Facades\Schema;
-use Yajra\DataTables\Facades\DataTables;
 
 class PlantController extends Controller
 {

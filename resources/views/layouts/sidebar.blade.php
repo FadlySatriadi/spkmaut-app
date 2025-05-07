@@ -17,27 +17,27 @@
         /* Disable horizontal scroll */
         padding-top: 20px;
     }
-
+    
     .nav-sidebar .nav-item .nav-link.active {
-        background-color: #ffffff !important;
+        background-color: wheat !important;
         color: #000 !important;
         font-weight: bold;
         /* Menebalkan teks */
     }
 
     .nav-sidebar .nav-item .nav-link {
-        color: #ffffff !important;
+        color: wheat !important;
     }
 
     .nav-sidebar .nav-item .nav-link.active {
-        background-color: #ffffff !important;
+        background-color: wheat !important;
         color: #000 !important;
         font-weight: bold;
     }
 
     /* Mengubah background search bar menjadi putih */
     .form-control-sidebar {
-        background-color: #ffffff !important;
+        background-color: wheat !important;
         /* Background putih */
         color: #000 !important;
         /* Warna teks hitam */
@@ -53,7 +53,7 @@
 
     /* Mengubah warna tombol search agar sesuai */
     .btn-sidebar {
-        background-color: #ffffff !important;
+        background-color: wheat !important;
         /* Warna tombol putih */
         border: 1px solid #ccc !important;
         /* Border tombol */
@@ -128,8 +128,8 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ url('rekomendasi/cache-history') }}" 
-                                class="nav-link {{ $activeMenu == 'history' ? 'active' : '' }}"">
+                            <a href="{{ url('/recommendation/cache-history') }}" 
+                                class="nav-link {{ $activeMenu == 'history' ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-history"></i>
                                 <p>History</p>
                             </a>
@@ -140,7 +140,7 @@
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit" class="btn btn-block text-left nav-link"
-                            style="color: #ffffff; background: transparent; border: none; padding: 0.5rem 1rem;">
+                            style="color: wheat; background: transparent; border: none; padding: 0.5rem 1rem;">
                             <i class="nav-icon fas fa-sign-out-alt"></i>
                             <p style="display: inline;">Logout</p>
                         </button>

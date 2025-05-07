@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>AdminLTE 3 | Log in (v2)</title>
+    <title>DSS Batching Plant | Login</title>
 
     <!-- Google Font: Source Sans Pro -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -98,8 +98,8 @@
                 <form method="POST" action="{{ route('proses_login') }}">
                     @csrf
                     <div class="input-group mb-3">
-                        <input type="text" class="form-control" style="border: 2px solid #800000;" name="username"
-                            placeholder="Username">
+                        <input type="username" class="form-control" style="border: 2px solid #800000;" name="username"
+                            placeholder="Username" autofocus>
                     </div>
                     <div class="input-group mb-3">
                         <input type="password" class="form-control" style="border: 2px solid #800000;" name="password"

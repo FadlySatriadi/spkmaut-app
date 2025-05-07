@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\AubModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -21,7 +22,7 @@ class AubController extends Controller
 
         // Ambil data langsung dengan filter
         $query = AubModel::select('idaub', 'kodeaub', 'namaaub');
-        
+
         if ($request->has('kodeaub') && !empty($request->kodeaub)) {
             $query->where('kodeaub', $request->kodeaub);
         }
@@ -34,7 +35,7 @@ class AubController extends Controller
             'page' => $page,
             'activeMenu' => $activeMenu,
             'aub' => $aub, // Kirim data ke view
-            
+
         ]);
     }
 

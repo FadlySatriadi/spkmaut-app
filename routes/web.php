@@ -8,6 +8,8 @@ use App\Http\Controllers\PlantController;
 use App\Http\Controllers\AlternatifController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\RekomendasiController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\OfficerController;
 
 
 Route::get('login', [AuthController::class, 'index'])->name('login');

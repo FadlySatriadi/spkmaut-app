@@ -18,7 +18,7 @@
                 </div>
             </div>
             <div class="card-footer">
-                <button type="submit" class="btn btn-primary">
+                <button type="submit" class="btn btn-primary" style="background-color: #800000; color: white; border: 1px solid #800000;">
                     Lanjut ke Input Nilai <i class="fas fa-arrow-right"></i>
                 </button>
             </div>

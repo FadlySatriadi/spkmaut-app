@@ -643,7 +643,7 @@ class RekomendasiController extends Controller
         $pdf->setOption('isRemoteEnabled', true);
         $pdf->setOption('isHtml5ParserEnabled', true);
 
-        return $pdf->download('Rekomendasi Penutupan Plant.pdf');
+        return $pdf->download('Hasil Rekomendasi Penutupan Plant.pdf');
     }
 
     public function printHistory($timestamp)
@@ -695,6 +695,6 @@ class RekomendasiController extends Controller
         $pdf->setOption('isRemoteEnabled', true);
         $pdf->setOption('isHtml5ParserEnabled', true);
 
-        return $pdf->download('Rekomendasi-History-' . $timestamp . '.pdf');
+        return $pdf->download('Hasil Rekomendasi Penutupan Plant.pdf');
     }
 }
