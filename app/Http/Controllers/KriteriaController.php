@@ -13,7 +13,7 @@ class KriteriaController extends Controller
     {
         $breadcrumb = (object) [
             'title' => 'Daftar Kriteria',
-            'list' => ['Home', 'Kriteria']
+            'list' => ['DSS Batching Plant', 'Kriteria']
         ];
 
         $page = (object)['title' => 'Daftar Kriteria yang terdaftar dalam sistem'];
@@ -52,7 +52,7 @@ class KriteriaController extends Controller
     {
         $breadcrumb = (object) [
             'title' => 'Tambah Aub',
-            'list' => ['Home', 'Aub', 'Tambah']
+            'list' => ['DSS Batching Plant', 'Aub', 'Tambah']
         ];
 
         $page = (object)[
@@ -86,7 +86,7 @@ class KriteriaController extends Controller
 
         $breadcrumb = (object) [
             'title' => 'Detail Kriteria',
-            'list' => ['Home', 'kriteria', 'Detail']
+            'list' => ['DSS Batching Plant', 'kriteria', 'Detail']
         ];
 
         $page = (object)[
@@ -104,7 +104,7 @@ class KriteriaController extends Controller
 
         $breadcrumb = (object) [
             'title' => 'Edit Data Kriteria',
-            'list' => ['Home', 'kriteria', 'Edit']
+            'list' => ['DSS Batching Plant', 'kriteria', 'Edit']
         ];
 
         $page = (object)[

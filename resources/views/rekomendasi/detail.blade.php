@@ -208,7 +208,10 @@
                                 <td>{{ number_format($result['total'], 5) }}</td>
                                 <td>
                                     @if ($index === 0)
-                                        <span class="recommendation-text">! Direkomendasikan untuk ditutup</span>
+                                    <span class="recommendation-text">
+                                        <i class="fas fa-exclamation-triangle recommendation-icon mr-2" style="color: #800000;"></i>Direkomendasikan
+                                        untuk ditutup
+                                    </span>
                                     @endif
                                 </td>
                             </tr>
@@ -233,14 +236,14 @@
             </a> --}}
             <form action="{{ route('rekomendasi.save-cache') }}" method="POST">
                 @csrf
-                <button type="submit" class="btn btn-success">
+                <button type="submit" class="btn btn-success" style="float: right;">
                     <i class="fas fa-save"></i> Simpan ke Riwayat
                 </button>
+                <a href="{{ route('rekomendasi.cetak') }}" class="btn btn-primary"
+                    style="background-color: #800000; color: white; border: 1px solid #800000;">
+                    <i class="fas fa-print"></i> Cetak PDF
+                </a>
             </form>
-            <a href="{{ route('rekomendasi.cetak') }}" class="btn btn-primary"
-                style="background-color: #800000; color: white; border: 1px solid #800000;">
-                <i class="fas fa-print"></i> Cetak PDF
-            </a>
         </div>
     </div>
 @endsection

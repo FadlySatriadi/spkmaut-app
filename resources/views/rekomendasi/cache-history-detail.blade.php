@@ -67,8 +67,9 @@
                     User : {{ Auth::user()->name }}
                 </div>
                 <div class="recommendation-detail">
-                    Plant : <strong>{{ $rankedResults[0]['plant']->kodealternatif }} - {{ $rankedResults[0]['plant']->namaplant }} -
-                    {{ $rankedResults[0]['plant']->aub->namaaub }}</strong>
+                    Plant : <strong>{{ $rankedResults[0]['plant']->kodealternatif }} -
+                        {{ $rankedResults[0]['plant']->namaplant }} -
+                        {{ $rankedResults[0]['plant']->aub->namaaub }}</strong>
                 </div>
                 <div class="recommendation-detail">
                     Skor : {{ number_format($rankedResults[0]['total'], 4) }}
@@ -222,7 +223,10 @@
                                 <td>{{ number_format($result['total'], 5) }}</td>
                                 <td>
                                     @if ($index === 0)
-                                        <span class="recommendation-text">! Direkomendasikan untuk ditutup</span>
+                                        <span class="recommendation-text">
+                                            <i class="fas fa-exclamation-triangle recommendation-icon mr-2" style="color: #800000;"></i>Direkomendasikan
+                                            untuk ditutup
+                                        </span>
                                     @endif
                                 </td>
                             </tr>
@@ -234,7 +238,7 @@
 
         <div class="alert alert-info mb-4" style="text-align: center">
             <i class="fas fa-info-circle"></i> Berdasarkan hasil perhitungan yang dilakukan menggunakan metode <em>Multi
-            Attribute Utility Theory</em> didapat hasil bahwa Batching Plant
+                Attribute Utility Theory</em> didapat hasil bahwa Batching Plant
             <strong>"{{ $rankedResults[0]['plant']->namaplant }}"</strong> dari
             <strong>{{ $rankedResults[0]['plant']->aub->namaaub ?? 'N/A' }}</strong>
             direkomendasikan untuk <strong>DITUTUP.</strong> Segala

@@ -14,7 +14,7 @@ class AubController extends Controller
     {
         $breadcrumb = (object) [
             'title' => 'Daftar Anak Usaha Beton',
-            'list' => ['Home', 'AUB']
+            'list' => ['DSS Batching Plant', 'AUB']
         ];
 
         $page = (object)['title' => 'Daftar AUB yang terdaftar dalam sistem'];
@@ -43,7 +43,7 @@ class AubController extends Controller
     {
         $breadcrumb = (object) [
             'title' => 'Tambah Aub',
-            'list' => ['Home', 'Aub', 'Tambah']
+            'list' => ['DSS Batching Plant', 'Aub', 'Tambah']
         ];
 
         $page = (object)[
@@ -77,7 +77,7 @@ class AubController extends Controller
 
         $breadcrumb = (object) [
             'title' => 'Detail Anak Usaha Beton',
-            'list' => ['Home', 'aub', 'Detail']
+            'list' => ['DSS Batching Plant', 'aub', 'Detail']
         ];
 
         $page = (object)[
@@ -95,7 +95,7 @@ class AubController extends Controller
 
         $breadcrumb = (object) [
             'title' => 'Edit Data AUB',
-            'list' => ['Home', 'aub', 'Edit']
+            'list' => ['DSS Batching Plant', 'aub', 'Edit']
         ];
 
         $page = (object)[

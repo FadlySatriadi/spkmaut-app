@@ -12,7 +12,7 @@ class PlantController extends Controller
     {
         $breadcrumb = (object) [
             'title' => 'Daftar Plant',
-            'list' => ['Home', 'Plant']
+            'list' => ['DSS Batching Plant', 'Plant']
         ];
 
         $page = (object)['title' => 'Daftar Plant yang terdaftar dalam sistem'];
@@ -56,7 +56,7 @@ class PlantController extends Controller
     {
         $breadcrumb = (object) [
             'title' => 'Tambah Plant',
-            'list' => ['Home', 'Plant', 'Tambah']
+            'list' => ['DSS Batching Plant', 'Plant', 'Tambah']
         ];
 
         $page = (object)[
@@ -96,7 +96,7 @@ class PlantController extends Controller
 
         $breadcrumb = (object) [
             'title' => 'Detail Anak Usaha Beton',
-            'list' => ['Home', 'plant', 'Detail']
+            'list' => ['DSS Batching Plant', 'plant', 'Detail']
         ];
 
         $page = (object)[
@@ -114,7 +114,7 @@ class PlantController extends Controller
 
         $breadcrumb = (object) [
             'title' => 'Edit Data Plant',
-            'list' => ['Home', 'plant', 'Edit']
+            'list' => ['DSS Batching Plant', 'plant', 'Edit']
         ];
 
         $page = (object)[

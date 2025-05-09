@@ -50,7 +50,10 @@
                                 <td class="text-center">{{ number_format($result['total_utility'], 4) }}</td>
                                 <td>
                                     @if($index === 0)
-                                        <span class="recommendation-text">Direkomendasikan untuk ditutup</span>
+                                    <span class="recommendation-text">
+                                        <i class="fas fa-exclamation-triangle recommendation-icon mr-2" style="color: #800000;"></i>Direkomendasikan
+                                        untuk ditutup
+                                    </span>
                                     @endif
                                 </td>
                             </tr>
@@ -62,16 +65,16 @@
         <div class="mt-4">
             <form action="{{ route('rekomendasi.save-cache') }}" method="POST">
                 @csrf
-                <button type="submit" class="btn btn-success">
+                <button type="submit" class="btn btn-success" style="background-color: midnightblue; border:midnightblue">
                     <i class="fas fa-save"></i> Simpan ke Riwayat
                 </button>
+                <a href="{{ route('rekomendasi.detail') }}" class="btn btn-primary" style="background-color: #800000; border:#800000">
+                    <i class="fas fa-calculator"></i> Lihat Detail Perhitungan
+                </a>
+                <a href="{{ route('rekomendasi.cetak') }}" class="btn btn-primary" style="background-color: darkgoldenrod; border:darkgoldenrod">
+                    <i class="fas fa-calculator"></i> Cetak PDF
+                </a>
             </form>
-            <a href="{{ route('rekomendasi.detail') }}" class="btn btn-primary">
-                <i class="fas fa-calculator"></i> Lihat Detail Perhitungan
-            </a>
-            <a href="{{ route('rekomendasi.cetak') }}" class="btn btn-primary">
-                <i class="fas fa-calculator"></i> Cetak PDF
-            </a>
         </div>
     </div>
 

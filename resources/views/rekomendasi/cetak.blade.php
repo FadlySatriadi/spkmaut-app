@@ -145,7 +145,7 @@
     </div>
     <div class="footer">
         <p>Oleh : {{ $user }}</p>
-        <p>Dicetak pada : {{ now()->format('d F Y H:i:s') }}</p>
+        <p>Dicetak pada : {{ now()->setTimezone('Asia/Jakarta')->translatedFormat('d F Y H:i:s') }}</p>
     </div>
 </body>
 

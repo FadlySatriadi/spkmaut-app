@@ -127,7 +127,11 @@
                     <td>{{ number_format($result['total_utility'], 3) }}</td>
                     <td>
                         @if ($index === 0)
-                            <span class="recommendation-note">Direkomendasikan untuk ditutup !</span>
+                            <span class="recommendation-text">
+                                <i class="fas fa-exclamation-triangle recommendation-icon mr-2"
+                                    style="color: #800000;"></i>! Direkomendasikan
+                                untuk ditutup
+                            </span>
                         @endif
                     </td>
                 </tr>
@@ -146,7 +150,7 @@
 
     <div class="footer">
         <p>User : {{ $user }}</p>
-        <p>Dicetak pada : {{ now()->format('d F Y H:i:s') }}</p>
+        <p>Dicetak pada : {{ now()->setTimezone('Asia/Jakarta')->translatedFormat('d F Y H:i:s') }}</p>
     </div>
 </body>
 

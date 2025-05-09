@@ -18,7 +18,7 @@ class RekomendasiController extends Controller
 
         $breadcrumb = (object) [
             'title' => 'Pilih Plant',
-            'list' => ['Home', 'Rekomendasi', 'Pilih Plant']
+            'list' => ['DSS Batching Plant', 'Rekomendasi', 'Pilih Plant']
         ];
 
         $activeMenu = 'rekomendasi';
@@ -119,7 +119,7 @@ class RekomendasiController extends Controller
     {
         $breadcrumb = (object) [
             'title' => 'Pilih Plant',
-            'list' => ['Home', 'Rekomendasi', 'Pilih Plant']
+            'list' => ['DSS Batching Plant', 'Rekomendasi', 'Pilih Plant']
         ];
 
         $activeMenu = 'rekomendasi';
@@ -150,7 +150,7 @@ class RekomendasiController extends Controller
     {
         $breadcrumb = (object) [
             'title' => 'Form Penilaian Plant',
-            'list' => ['Home', 'Rekomendasi', 'Form Penilaian Plant']
+            'list' => ['DSS Batching Plant', 'Rekomendasi', 'Form Penilaian Plant']
         ];
 
         $activeMenu = 'rekomendasi';
@@ -285,7 +285,7 @@ class RekomendasiController extends Controller
                 'rankedResults' => $rankedResults,
                 'breadcrumb' => (object) [
                     'title' => 'Detail Perhitungan',
-                    'list' => ['Home', 'Rekomendasi', 'Detail']
+                    'list' => ['DSS Batching Plant', 'Rekomendasi', 'Detail']
                 ],
                 'activeMenu' => 'rekomendasi'
             ]);
@@ -374,7 +374,7 @@ class RekomendasiController extends Controller
             'histories' => $histories,
             'breadcrumb' => (object) [
                 'title' => 'Riwayat Rekomendasi',
-                'list' => ['Home', 'Riwayat']
+                'list' => ['DSS Batching Plant', 'Riwayat']
             ],
             'activeMenu' => 'history'
         ]);
@@ -509,7 +509,7 @@ class RekomendasiController extends Controller
                 'rankedResults' => $rankedResults,
                 'breadcrumb' => (object) [
                     'title' => 'Detail Riwayat Perhitungan',
-                    'list' => ['Home', 'Rekomendasi', 'Riwayat', 'Detail']
+                    'list' => ['DSS Batching Plant', 'Rekomendasi', 'Riwayat', 'Detail']
                 ],
                 'timestamp' => $timestamp,
                 'activeMenu' => 'history'
