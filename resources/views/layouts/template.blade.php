@@ -2,6 +2,8 @@
 <html lang="en">
 
 <head>
+    <link rel="shortcut icon" href="{{ asset('lte/dist/img/signav.png') }}" type="image/x-icon">
+    <link rel="icon" type="image/png" href="{{ asset('lte/dist/img/signav.png') }}">
     <style>
         /* Footer tetap di bawah dan ukuran konsisten */
         .main-footer {
@@ -74,7 +76,8 @@
     <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css"
         rel="stylesheet" />
     <!-- Google Font: Source Sans Pro -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="{{ asset('lte/plugins/fontawesome-free/css/all.min.css') }}">
     <!-- Theme style -->

@@ -4,10 +4,13 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" href="{{ asset('lte/dist/img/signav.png') }}" type="image/x-icon">
+    <link rel="icon" type="image/png" href="{{ asset('lte/dist/img/signav.png') }}">
     <title>DSS Batching Plant | Login</title>
 
     <!-- Google Font: Source Sans Pro -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="{{ asset('lte/plugins/fontawesome-free/css/all.min.css') }}">
     <!-- Theme style -->
@@ -30,8 +33,8 @@
         .login-box {
             width: 475px;
             position: absolute;
-            right: 150px;
-            bottom: 120px;
+            right: 183px;
+            bottom: 160px;
             transform: translateY(-50%) animation: fadeInRight 1s ease-out;
         }
 

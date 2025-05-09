@@ -17,7 +17,7 @@
         /* Disable horizontal scroll */
         padding-top: 20px;
     }
-    
+
     .nav-sidebar .nav-item .nav-link.active {
         background-color: wheat !important;
         color: #000 !important;
@@ -82,6 +82,40 @@
     .sidebar nav ul li.nav-header {
         border-bottom: 1px solid #fff !important;
     }
+
+    .logout-btn {
+        color: #800000 !important;
+        background: wheat !important;
+        border: none !important;
+        padding: 10px 15px !important;
+        transition: all 0.3s ease;
+        border-radius: 4px;
+        width: 100%;
+        text-align: left;
+    }
+
+    .logout-btn:hover {
+        background-color: rgb(255, 220, 138) !important;
+        color: #800000e !important;
+        transform: translateX(5px);
+    }
+
+    .logout-btn i {
+        transition: transform 0.3s ease;
+    }
+
+    .logout-btn:hover i {
+        transform: rotate(180deg);
+    }
+
+    .logout-btn span {
+        display: inline-block;
+        transition: transform 0.3s ease;
+    }
+
+    .logout-btn:hover span {
+        transform: translateX(5px);
+    }
 </style>
 
 <body class="hold-transition sidebar-mini">
@@ -128,7 +162,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ url('/recommendation/cache-history') }}" 
+                            <a href="{{ url('/recommendation/cache-history') }}"
                                 class="nav-link {{ $activeMenu == 'history' ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-history"></i>
                                 <p>History</p>
@@ -136,11 +170,12 @@
                         </li>
                     </ul>
                 </nav>
-                <div class="sidebar-footer p-2" style="border-top: 1px solid rgba(255,255,255,0.1);">
+                <div class="sidebar-footer p-2">
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <button type="submit" class="btn btn-block text-left nav-link"
-                            style="color: wheat; background: transparent; border: none; padding: 0.5rem 1rem;">
+                        <button type="submit"
+                            class="btn btn-block text-left logout-btn {{ request()->is('logout') ? 'active' : '' }}"
+                            style="color: #ffffff; background: wheat; border: none; padding: 0.5rem 1rem;">
                             <i class="nav-icon fas fa-sign-out-alt"></i>
                             <p style="display: inline;">Logout</p>
                         </button>

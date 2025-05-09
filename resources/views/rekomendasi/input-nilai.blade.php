@@ -44,7 +44,7 @@
                 <a href="{{ route('rekomendasi.select-plants') }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> Kembali
                 </a>
-                <button type="submit" class="btn btn-primary float-right">
+                <button type="submit" class="btn btn-primary custom-btn float-right" style="background-color: #800000; border:#800000 1px">
                     <i class="fas fa-calculator"></i> Hitung Rekomendasi
                 </button>
             </div>

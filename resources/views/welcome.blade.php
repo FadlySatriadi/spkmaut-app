@@ -1,18 +1,23 @@
 @extends('layouts.template')
-
 @section('content')
     <div class="card">
-      <div class="card-body" style="background-color: beige">
-        <div>
-            <h4 style="color: #800000;">
-                <i class="fas fa-user-circle mr-2"></i>
-                Hai, <strong>{{ Auth::user()->nama ?? 'Pengguna' }}</strong> !
-            </h4>
-            <p>
-                Selamat datang di Sistem Pendukung Keputusan Penutupan Batching Plant. Sistem ini akan membantu Anda dalam proses pengambilan keputusan menggunakan metode Multi Attribute Utility Theory.
-            </p>
+        <div class="card-body" style="background-color: beige">
+            <div>
+                <h4 style="color: #800000;">
+                    <i class="fas fa-user-circle mr-2"></i>
+                    Hai, <strong>{{ Auth::user()->nama ?? 'Pengguna' }}</strong> !
+                </h4>
+                <p>
+                    Selamat datang di Sistem Pendukung Keputusan Penutupan Batching Plant. Sistem ini akan membantu Anda
+                    dalam proses pengambilan keputusan menggunakan metode Multi Attribute Utility Theory.
+                </p>
+            </div>
+            <a href="{{ url('/rekomendasi/select-plants') }}">
+                <button type="button" class="btn btn-primary custom-btn" style="background-color: #800000; border:#800000">
+                    <strong>Mulai Sekarang &nbsp;&nbsp;&nbsp;</strong><i class="fas fa-arrow-right"></i>
+                </button>
+            </a>
         </div>
-      </div>
     </div>
     <div class="card">
         <div class="card-header d-flex justify-content-center" style="background-color: #800000; color:wheat">
@@ -92,7 +97,7 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header d-flex justify-content-center" style="background-color: #800000; color:wheat">
-                    <h3 class="card-title"><strong>KRITERIA</strong></h3>
+                    <h3 class="card-title"><strong>KRITERIA PENILAIAN</strong></h3>
                     <div class="card-tools"></div>
                 </div>
                 <div class="card-body" style="background-color: beige">
@@ -370,27 +375,3 @@
         </div>
     </div>
 @endsection
-
-@push('styles')
-    <style>
-        .bg-purple {
-            background-color: #800080 !important;
-            color: white !important;
-        }
-
-        .bg-maroon {
-            background-color: #800000 !important;
-            color: white !important;
-        }
-
-        .small-box:hover {
-            transform: translateY(-5px);
-            transition: all 0.3s ease;
-        }
-
-        .small-box .icon {
-            font-size: 70px;
-            opacity: 0.3;
-        }
-    </style>
-@endpush
