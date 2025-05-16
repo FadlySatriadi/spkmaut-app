@@ -67,7 +67,7 @@ class OAubController extends Controller
             'title' => 'Detail aub'
         ];
 
-        $activeMenu = 'officer_aub';
+        $activeMenu = 'officeraub';
 
         return view('officer.aub.show', ['breadcrumb' => $breadcrumb, 'page' => $page, 'oaub' => $oaub, 'activeMenu' => $activeMenu]);
     }

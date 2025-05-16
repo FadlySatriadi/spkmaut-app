@@ -64,9 +64,6 @@
                     Tanggal : {{ \Carbon\Carbon::parse($historyData['date'])->format('d M Y H:i') }}
                 </div>
                 <div class="recommendation-detail">
-                    User : {{ Auth::user()->name }}
-                </div>
-                <div class="recommendation-detail">
                     Plant : <strong>{{ $rankedResults[0]['plant']->kodealternatif }} -
                         {{ $rankedResults[0]['plant']->namaplant }} -
                         {{ $rankedResults[0]['plant']->aub->namaaub }}</strong>

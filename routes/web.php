@@ -82,16 +82,6 @@ Route::group(['prefix' => 'okriteria'], function () {
     Route::delete('/{id}', [OKriteriaController::class, 'destroy']);
 });
 
-Route::group(['prefix' => 'alternatif'], function () {
-    Route::get('/', [AlternatifController::class, 'index']);
-    Route::get('/create', [AlternatifController::class, 'create']);
-    Route::post('/', [AlternatifController::class, 'store']);
-    Route::get('/{id}', [AlternatifController::class, 'show']);
-    Route::get('/{id}/edit', [AlternatifController::class, 'edit']);
-    Route::put('/{id}', [AlternatifController::class, 'update']);
-    Route::delete('/{id}', [AlternatifController::class, 'destroy']);
-});
-
 Route::middleware(['auth'])->group(function () {
     Route::prefix('rekomendasi')->group(function () {
         Route::get('/select-plants', [RekomendasiController::class, 'selectPlants'])->name('rekomendasi.select-plants');

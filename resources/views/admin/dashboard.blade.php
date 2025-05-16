@@ -5,7 +5,7 @@
             <div>
                 <h4 style="color: #800000;">
                     <i class="fas fa-user-circle mr-2"></i>
-                    Hai, <strong>{{ Auth::user()->nama ?? 'Pengguna' }}</strong> !
+                    Hai, Admin <strong>{{ Auth::user()->nama ?? 'Pengguna' }}</strong> !
                 </h4>
                 <p>
                     Selamat datang di Sistem Pendukung Keputusan Penutupan Batching Plant. Sistem ini akan membantu Anda
