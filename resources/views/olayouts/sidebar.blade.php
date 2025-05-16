@@ -136,27 +136,34 @@
                         </li>
 
                         <li class="nav-item">
-                            <a href="{{ url('/aub') }}" class="nav-link {{ $activeMenu == 'aub' ? 'active' : '' }}">
+                            <a href="{{ url('/officeraub') }}" class="nav-link {{ $activeMenu == 'officeraub' ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-map-marked-alt"></i>
-                                <p>Data AUB</p>
+                                <p>Anak Usaha</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ url('/plant') }}" class="nav-link {{ $activeMenu == 'plant' ? 'active' : '' }}">
+                            <a href="{{ url('/oplant') }}" class="nav-link {{ $activeMenu == 'oplant' ? 'active' : '' }}">
                                 <i class="nav-icon fa fa-industry"></i>
-                                <p>Data Plant</p>
+                                <p>Batching Plant</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ url('/kriteria') }}"
-                                class="nav-link {{ $activeMenu == 'kriteria' ? 'active' : '' }}">
+                            <a href="{{ url('/okriteria') }}"
+                                class="nav-link {{ $activeMenu == 'okriteria' ? 'active' : '' }}">
                                 <i class="nav-icon fa fa-envelope"></i>
-                                <p>Data Kriteria</p>
+                                <p>Kriteria</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ url('/recommendation/cache-history') }}"
-                                class="nav-link {{ $activeMenu == 'history' ? 'active' : '' }}">
+                            <a href="{{ url('o/rekomendasi/select-plants') }}"
+                                class="nav-link {{ $activeMenu == 'rekomendasi' ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-hard-hat"></i>
+                                <p>Penilaian</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ url('o/recommendation/cache-history') }}"
+                                class="nav-link {{ $activeMenu == 'ohistory' ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-history"></i>
                                 <p>History</p>
                             </a>

@@ -6,27 +6,23 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
 {
-    protected $table = 'users'; // Sesuaikan dengan tabel Anda
-    protected $primaryKey = 'iduser'; // Sesuaikan
+    protected $table = 'users';
+    protected $primaryKey = 'iduser';
 
     protected $fillable = [
         'username',
         'nama',
-        'role',
         'password',
+        'role',
     ];
 
-    public function role()
+    public function admin()
     {
-        return $this->belongsTo(Role::class, 'role_id', 'idrole');
+        return $this->hasOne(Admin::class, 'iduser', 'iduser');
     }
-    
-    public function getNameAttribute()
+
+    public function officer()
     {
-        return $this->attributes['nama'];
+        return $this->hasOne(Officer::class, 'iduser', 'iduser');
     }
-    
-    protected $hidden = [
-        'password',
-    ];
 }

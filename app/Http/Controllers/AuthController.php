@@ -24,11 +24,18 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            return redirect()->intended('/welcome');
+
+            // Redirect berdasarkan role
+            $user = Auth::user();
+            if ($user->role === 'admin') {
+                return redirect()->intended('/admin/dashboard');
+            } elseif ($user->role === 'officer') {
+                return redirect()->intended('/officer/dashboard');
+            }
         }
 
         return back()->withErrors([
-            'username' => 'The provided credentials do not match our records.',
+            'username' => 'Username atau password salah.',
         ]);
     }
 
@@ -42,4 +49,4 @@ class AuthController extends Controller
 
         return redirect('/login')->with('success', 'Anda telah logout');
     }
-}   
+}

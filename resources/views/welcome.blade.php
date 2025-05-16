@@ -9,7 +9,7 @@
                 </h4>
                 <p>
                     Selamat datang di Sistem Pendukung Keputusan Penutupan Batching Plant. Sistem ini akan membantu Anda
-                    dalam proses pengambilan keputusan menggunakan metode Multi Attribute Utility Theory.
+                    dalam proses pengambilan keputusan menggunakan metode <em><strong>Multi Attribute Utility Theory.</strong></em>
                 </p>
             </div>
             <a href="{{ url('/rekomendasi/select-plants') }}">

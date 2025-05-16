@@ -5,12 +5,13 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\PlantModel;
 use App\Models\KriteriaModel;
+use App\Models\HistoryModel;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
 
-class RekomendasiController extends Controller
+class ORekomendasiController extends Controller
 {
     public function calculate(Request $request)
     {
@@ -41,7 +42,7 @@ class RekomendasiController extends Controller
         session(['calculation_results' => $results]);
 
         // Tampilkan hasil
-        return view('rekomendasi.result', [
+        return view('officer.rekomendasi.result', [
             'breadcrumb' => $breadcrumb,
             'results' => $results,
             'criterias' => $criterias,
@@ -125,7 +126,7 @@ class RekomendasiController extends Controller
 
         $plants = PlantModel::where('status', 'aktif')->get();
 
-        return view('rekomendasi.select-plants', [
+        return view('officer.rekomendasi.select-plants', [
             'breadcrumb' => $breadcrumb,
             'plants' => $plants,
             'activeMenu' => $activeMenu
@@ -142,7 +143,7 @@ class RekomendasiController extends Controller
         // Simpan ke session
         session(['selected_plants' => $request->plants]);
 
-        return redirect()->route('rekomendasi.input-nilai');
+        return redirect()->route('officer.rekomendasi.input-nilai');
     }
 
     public function inputNilai()
@@ -158,14 +159,14 @@ class RekomendasiController extends Controller
         $plantIds = session('selected_plants');
 
         if (!$plantIds) {
-            return redirect()->route('rekomendasi.select-plants')
+            return redirect()->route('officer.rekomendasi.select-plants')
                 ->with('error', 'Silakan pilih plant terlebih dahulu');
         }
 
         $plants = PlantModel::whereIn('idplant', $plantIds)->get();
         $criterias = KriteriaModel::orderByRaw('LENGTH(kodekriteria), kodekriteria')->get();
 
-        return view('rekomendasi.input-nilai', [
+        return view('officer.rekomendasi.input-nilai', [
             'breadcrumb' => $breadcrumb,
             'plants' => $plants,
             'criterias' => $criterias,
@@ -272,7 +273,7 @@ class RekomendasiController extends Controller
             // Ambil plant dengan ranking 1
             $topPlant = $rankedResults[0] ?? null;
             $activeMenu = 'rekomendasi';
-            return view('rekomendasi.detail', [
+            return view('officer.rekomendasi.detail', [
                 'plants' => $plants,
                 'criterias' => $criterias,
                 'nilai' => $nilaiInput,
@@ -350,13 +351,13 @@ class RekomendasiController extends Controller
         // Simpan ke cache
         Cache::put($cacheKey, array_slice($existingHistories, 0, 20), now()->addDays(30));
 
-        return redirect()->route('rekomendasi.cache-history')
+        return redirect()->route('officer.rekomendasi.cache-history')
             ->with('success', 'Rekomendasi berhasil disimpan di riwayat');
     }
 
     public function showCacheHistory()
     {
-        $activeMenu = 'history';
+        $activeMenu = 'ohistory';
         $user = Auth::user();
         $cacheKey = 'all_recommendation_history';
 
@@ -369,13 +370,13 @@ class RekomendasiController extends Controller
             $histories = [];
         }
 
-        return view('rekomendasi.cache-history', [
+        return view('officer.rekomendasi.cache-history', [
             'histories' => $histories,
             'breadcrumb' => (object) [
                 'title' => 'Riwayat Rekomendasi',
                 'list' => ['DSS Batching Plant', 'Riwayat']
             ],
-            'activeMenu' => 'history'
+            'activeMenu' => $activeMenu,    
         ]);
     }
 
@@ -496,7 +497,7 @@ class RekomendasiController extends Controller
                 })
                 ->all();
 
-            return view('rekomendasi.cache-history-detail', [
+            return view('officer.rekomendasi.cache-history-detail', [
                 'historyData' => $historyData,
                 'plants' => $plants,
                 'criterias' => $criterias,
@@ -520,7 +521,7 @@ class RekomendasiController extends Controller
                 'user' => Auth::id()
             ]);
 
-            return redirect()->route('rekomendasi.cache-history')
+            return redirect()->route('officer.rekomendasi.cache-history')
                 ->with('error', 'Terjadi kesalahan saat memuat data riwayat: ' . $e->getMessage());
         }
     }
@@ -599,7 +600,7 @@ class RekomendasiController extends Controller
         // Save back to cache
         Cache::put($cacheKey, $updatedHistories, now()->addDays(30));
 
-        return redirect()->route('rekomendasi.cache-history')
+        return redirect()->route('officer.rekomendasi.cache-history')
             ->with('success', 'Riwayat berhasil dihapus');
     }
 
@@ -636,7 +637,7 @@ class RekomendasiController extends Controller
         ];
 
         // Generate PDF
-        $pdf = Pdf::loadView('rekomendasi.cetak', $data);
+        $pdf = Pdf::loadView('officer.rekomendasi.cetak', $data);
 
         $pdf->setOption('defaultFont', 'Poppins');
         $pdf->setOption('isRemoteEnabled', true);
@@ -688,7 +689,7 @@ class RekomendasiController extends Controller
         ];
 
         // Generate PDF
-        $pdf = Pdf::loadView('rekomendasi.cetak-history', $data);
+        $pdf = Pdf::loadView('officer.rekomendasi.cetak-history', $data);
 
         $pdf->setOption('defaultFont', 'Poppins');
         $pdf->setOption('isRemoteEnabled', true);

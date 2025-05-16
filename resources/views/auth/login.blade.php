@@ -33,8 +33,8 @@
         .login-box {
             width: 475px;
             position: absolute;
-            right: 183px;
-            bottom: 160px;
+            right: 140px;
+            bottom: 120px;
             transform: translateY(-50%) animation: fadeInRight 1s ease-out;
         }
 
