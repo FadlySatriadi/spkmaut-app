@@ -359,7 +359,7 @@
                             <ul class="list-decimal ml-6 mb-6">
                                 <li>Dinormalisasi menjadi skala 0-1 (tergantung apakah benefit atau cost)</li>
                                 <li>Dikalikan dengan bobot masing-masing</li>
-                                <li>Dijumlahkan untuk menghasilkan skor akhir (<em>utility score</em>)</li>
+                                <li>Dijumlahkan untuk menghasilkan skor akhir <em>(utility score)</em></li>
                             </ul>
 
                             <p>

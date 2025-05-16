@@ -114,7 +114,7 @@
         <!-- Main Sidebar Container -->
         <aside class="main-sidebar sidebar-dark-primary elevation-4">
             <!-- Brand Logo -->
-            <a href="{{ url('/welcome') }}" class="brand-link text-center d-flex flex-column align-items-center">
+            <a href="{{ url('/admin/dashboard') }}" class="brand-link text-center d-flex flex-column align-items-center">
                 <img src="{{ asset('lte/dist/img/sig.png') }}" alt="Logo" class="brand-image mb-2"
                     style="opacity: .9; width: 100px; height: 100px; object-fit: contain;">
                 <span class="brand-text" style="font-family: 'Poppins', sans-serif; font-weight: 700; color: wheat;">
