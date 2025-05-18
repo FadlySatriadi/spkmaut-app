@@ -134,7 +134,12 @@
                                 <p>Dashboard</p>
                             </a>
                         </li>
-
+                        <li class="nav-item">
+                            <a href="{{ url('/user') }}" class="nav-link {{ $activeMenu == 'user' ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-map-marked-alt"></i>
+                                <p>Data Officer</p>
+                            </a>
+                        </li>
                         <li class="nav-item">
                             <a href="{{ url('/aub') }}" class="nav-link {{ $activeMenu == 'aub' ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-map-marked-alt"></i>

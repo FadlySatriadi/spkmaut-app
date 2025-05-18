@@ -14,7 +14,7 @@ use App\Http\Controllers\RekomendasiController;
 use App\Http\Controllers\ORekomendasiController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\OfficerController;
-
+use App\Http\Controllers\UserController;
 
 Route::middleware(['cek_login:admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
@@ -30,6 +30,15 @@ Route::get('login', [AuthController::class, 'index'])->name('login');
 Route::post('proses_login', [AuthController::class, 'proses_login'])->name('proses_login');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+Route::group(['prefix' => 'user'], function () {
+    Route::get('/', [UserController::class, 'index']);
+    Route::get('/create', [UserController::class, 'create']);
+    Route::post('/', [UserController::class, 'store']);
+    Route::get('/{id}', [UserController::class, 'show']);
+    Route::get('/{id}/edit', [UserController::class, 'edit']);
+    Route::put('/{id}', [UserController::class, 'update']);
+    Route::delete('/{id}', [UserController::class, 'destroy']);
+});
 
 Route::group(['prefix' => 'aub'], function () {
     Route::get('/', [AubController::class, 'index']);
