@@ -6,7 +6,7 @@
       <form method="POST" action="{{ url('kriteria') }}" class="form-horizontal">
         @csrf
         <div class="form-group row">
-          <label class="col-1 control-label col-form-label">Plant Kode</label>
+          <label class="col-1 control-label col-form-label">Kode Kriteria</label>
           <div class="col-11">
             <input type="text" class="form-control" style="border: 1px solid #800000;" id="kodekriteria" name="kodekriteria" value="{{ old('kodekriteria') }}"
               required>
@@ -16,11 +16,34 @@
           </div>
         </div>
         <div class="form-group row">
-          <label class="col-1 control-label col-form-label">Nama Plant</label>
+          <label class="col-1 control-label col-form-label">Nama Kriteria</label>
           <div class="col-11">
             <input type="text" class="form-control" style="border: 1px solid #800000;" id="namakriteria" name="namakriteria" value="{{ old('namakriteria') }}"
               required>
-            @error('kriteria')
+            @error('namakriteria')
+              <small class="form-text text-danger">{{ $message }}</small>
+            @enderror
+          </div>
+        </div>
+        <div class="form-group row">
+          <label class="col-1 control-label col-form-label">Bobot Kriteria</label>
+          <div class="col-11">
+            <input type="number" step="0.01" class="form-control" style="border: 1px solid #800000;" id="bobotkriteria" name="bobotkriteria" value="{{ old('bobotkriteria') }}"
+              required>
+            @error('bobotkriteria')
+              <small class="form-text text-danger">{{ $message }}</small>
+            @enderror
+          </div>
+        </div>
+        <div class="form-group row">
+          <label class="col-1 control-label col-form-label">Jenis Kriteria</label>
+          <div class="col-11">
+            <select class="form-control" style="border: 1px solid #800000;" id="jeniskriteria" name="jeniskriteria" required>
+              <option value="">Pilih Jenis Kriteria</option>
+              <option value="benefit" {{ old('jeniskriteria') == 'benefit' ? 'selected' : '' }}>Benefit</option>
+              <option value="cost" {{ old('jeniskriteria') == 'cost' ? 'selected' : '' }}>Cost</option>
+            </select>
+            @error('jeniskriteria')
               <small class="form-text text-danger">{{ $message }}</small>
             @enderror
           </div>

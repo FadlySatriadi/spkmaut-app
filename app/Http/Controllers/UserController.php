@@ -11,7 +11,7 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $breadcrumb = (object) [
-            'title' => 'Daftar Anak Usaha Beton',
+            'title' => 'Daftar Officer',
             'list' => ['DSS Batching Plant', 'User']
         ];
 
@@ -40,7 +40,7 @@ class UserController extends Controller
     public function create()
     {
         $breadcrumb = (object) [
-            'title' => 'Tambah User',
+            'title' => 'Tambah Officer',
             'list' => ['DSS Batching Plant', 'User', 'Tambah']
         ];
 
@@ -78,7 +78,7 @@ class UserController extends Controller
         $user = User::find($id);
 
         $breadcrumb = (object) [
-            'title' => 'Detail Anak Usaha Beton',
+            'title' => 'Detail Officer',
             'list' => ['DSS Batching Plant', 'user', 'Detail']
         ];
 
@@ -96,7 +96,7 @@ class UserController extends Controller
         $user = User::find($id);
 
         $breadcrumb = (object) [
-            'title' => 'Edit Data AUB',
+            'title' => 'Edit Data Officer',
             'list' => ['DSS Batching Plant', 'user', 'Edit']
         ];
 

@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\KriteriaModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -20,8 +21,8 @@ class KriteriaController extends Controller
         $activeMenu = 'kriteria';
 
         // Ambil data langsung dengan filter
-        $query = KriteriaModel::select('idkriteria', 'kodekriteria', 'namakriteria', 'bobotkriteria','jeniskriteria');
-        
+        $query = KriteriaModel::select('idkriteria', 'kodekriteria', 'namakriteria', 'bobotkriteria', 'jeniskriteria');
+
         if ($request->has('kodekriteria') && !empty($request->kodekriteria)) {
             $query->where('kodekriteria', $request->kodekriteria);
         }
@@ -29,7 +30,7 @@ class KriteriaController extends Controller
         $kriteria = $query->get();
 
         $totalBobot = $kriteria->sum('bobotkriteria');
-    
+
         // Tambahkan bobot normalisasi ke setiap kriteria
         $kriteria->each(function ($item) use ($totalBobot) {
             $item->bobotnormalisasi = $totalBobot > 0 ? $item->bobotkriteria / $totalBobot : 0;
@@ -51,8 +52,8 @@ class KriteriaController extends Controller
     public function create()
     {
         $breadcrumb = (object) [
-            'title' => 'Tambah Aub',
-            'list' => ['DSS Batching Plant', 'Aub', 'Tambah']
+            'title' => 'Tambah Kriteria',
+            'list' => ['DSS Batching Plant', 'Kriteria', 'Tambah']
         ];
 
         $page = (object)[
@@ -69,12 +70,16 @@ class KriteriaController extends Controller
     {
         $request->validate([
             'kodekriteria' => 'required|string|min:3|unique:kriteria,kodekriteria',
-            'namakriteria' => 'required|string|max:100'
+            'namakriteria' => 'required|string|max:100',
+            'bobotkriteria' => 'required|numeric|min:0',
+            'jeniskriteria' => 'required|in:benefit,cost'
         ]);
 
         KriteriaModel::create([
             'kodekriteria' => $request->kodekriteria,
-            'namakriteria' => $request->namakriteria
+            'namakriteria' => $request->namakriteria,
+            'bobotkriteria' => $request->bobotkriteria,
+            'jeniskriteria' => $request->jeniskriteria
         ]);
 
         return redirect('/kriteria')->with('success', 'Data kriteria berhasil ditambahkan');
