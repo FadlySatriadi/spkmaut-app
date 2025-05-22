@@ -69,7 +69,7 @@
                         {{ $rankedResults[0]['plant']->aub->namaaub }}</strong>
                 </div>
                 <div class="recommendation-detail">
-                    Skor : {{ number_format($rankedResults[0]['total'], 4) }}
+                    Skor : {{ number_format($rankedResults[0]['total_utility'], 4) }}
                 </div>
             </div>
         @endif
@@ -105,21 +105,62 @@
                         </tbody>
                     </table>
                 </div>
-                <div class="mt-3">
-                    <p><strong>Keterangan Kriteria :</strong></p>
-                    <ul>
-                        @foreach ($criterias as $criteria)
-                            <li>{{ $criteria->kodekriteria }} : {{ $criteria->namakriteria }}
-                                ({{ $criteria->jeniskriteria }})
-                            </li>
-                        @endforeach
-                    </ul>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-header card-header-maroon">
+                <h5 class="text-center">Nilai Maksimal dan Minimal per Kriteria</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Jenis Nilai</th>
+                                @foreach ($criterias as $criteria)
+                                    <th>{{ $criteria->kodekriteria }}</th>
+                                @endforeach
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Nilai Minimal</strong></td>
+                                @foreach ($criterias as $criteria)
+                                    @php
+                                        $values = [];
+                                        foreach ($plants as $plant) {
+                                            if (isset($nilai[$plant->idplant][$criteria->idkriteria])) {
+                                                $values[] = $nilai[$plant->idplant][$criteria->idkriteria];
+                                            }
+                                        }
+                                        $min = !empty($values) ? min($values) : 0;
+                                    @endphp
+                                    <td>{{ $min }}</td>
+                                @endforeach
+                            </tr>
+                            <tr>
+                                <td><strong>Nilai Maksimal</strong></td>
+                                @foreach ($criterias as $criteria)
+                                    @php
+                                        $values = [];
+                                        foreach ($plants as $plant) {
+                                            if (isset($nilai[$plant->idplant][$criteria->idkriteria])) {
+                                                $values[] = $nilai[$plant->idplant][$criteria->idkriteria];
+                                            }
+                                        }
+                                        $max = !empty($values) ? max($values) : 0;
+                                    @endphp
+                                    <td>{{ $max }}</td>
+                                @endforeach
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
 
         <!-- 3. Normalisasi Nilai Kriteria -->
-        <!-- Normalisasi Nilai Kriteria -->
         <div class="card mb-4">
             <div class="card-header card-header-maroon">
                 <h5 class="text-center">Normalisasi Nilai Kriteria</h5>
@@ -140,7 +181,7 @@
                                 <tr>
                                     <td><strong>{{ $plant->kodealternatif }}</strong></td>
                                     @foreach ($criterias as $criteria)
-                                        <td>{{ number_format($normalized[$plant->idplant][$criteria->idkriteria] ?? 0, 2) }}
+                                        <td>{{ number_format($normalized[$plant->idplant][$criteria->idkriteria], 2) }}
                                         </td>
                                     @endforeach
                                 </tr>
@@ -150,11 +191,53 @@
                 </div>
                 <p class="mt-3"><em>Rumus normalisasi :
                         Benefit = (nilai - min)/(max - min),
-                        Cost = (max - nilai)/(max - min)</em></p>
+                        Cost = 1 + (min - nilai)/(max - min)</em></p>
             </div>
         </div>
 
-        <!-- Perhitungan Nilai Utility -->
+        <!-- 4. Tabel Utilitas Marginal -->
+        <div class="card mb-4">
+            <div class="card-header card-header-maroon">
+                <h5 class="text-center">Perhitungan Utilitas Marginal</h5>
+            </div>
+            <div class="card-body">
+
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Alternatif</th>
+                                @foreach ($criterias as $criteria)
+                                    <th>{{ $criteria->kodekriteria }}</th>
+                                @endforeach
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($plants as $plant)
+                                <tr>
+                                    <td><strong>{{ $plant->kodealternatif }}</strong></td>
+                                    @foreach ($criterias as $criteria)
+                                        @php
+                                            $detail = collect($results[$plant->idplant]['detail'])->firstWhere(
+                                                'kriteria_id',
+                                                $criteria->idkriteria,
+                                            );
+                                        @endphp
+                                        <td>{{ number_format($detail['marginal_utility'], 3) }}</td>
+                                    @endforeach
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                    <div class="formula-box">
+                    <em>Rumus Utilitas Marginal : U<sub>ij</sub> = (e<sup>(r*<sub>ij</sub>)²</sup> - 1) /
+                        1.71</em>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Perhitungan Nilai Kepuasan (Utility) -->
         <div class="card mb-4">
             <div class="card-header card-header-maroon">
                 <h5 class="text-center">Perhitungan Nilai Utility</h5>
@@ -176,18 +259,17 @@
                                 <tr>
                                     <td><strong>{{ $plant->kodealternatif }}</strong></td>
                                     @foreach ($criterias as $criteria)
-                                        <td>{{ number_format($utility[$plant->idplant][$criteria->idkriteria] ?? 0, 3) }}
-                                        </td>
+                                        <td>{{ number_format($utility[$plant->idplant][$criteria->idkriteria], 3) }}</td>
                                     @endforeach
                                     <td class="table-success">
-                                        {{ number_format($results[$plant->idplant]['total'] ?? 0, 5) }}
+                                        {{ number_format($results[$plant->idplant]['total_utility'], 5) }}
                                     </td>
                                 </tr>
                             @endforeach
                         </tbody>
                     </table>
                 </div>
-                <p class="mt-3"><em>Utility = Nilai Normalisasi × Bobot Normalisasi</em></p>
+                <p class="mt-3"><em>Utility = Nilai Normalisasi Marginal × Bobot Normalisasi Kriteria</em></p>
             </div>
         </div>
 
@@ -217,11 +299,12 @@
                                 <td>{{ $result['plant']->kodealternatif }}</td>
                                 <td>{{ $result['plant']->aub->namaaub }}</td>
                                 <td>{{ $result['plant']->namaplant }}</td>
-                                <td>{{ number_format($result['total'], 5) }}</td>
+                                <td>{{ number_format($result['total_utility'], 5) }}</td>
                                 <td>
                                     @if ($index === 0)
                                         <span class="recommendation-text">
-                                            <i class="fas fa-exclamation-triangle recommendation-icon mr-2" style="color: #800000;"></i>Direkomendasikan
+                                            <i class="fas fa-exclamation-triangle recommendation-icon mr-2"
+                                                style="color: #800000;"></i>Direkomendasikan
                                             untuk ditutup
                                         </span>
                                     @endif
@@ -236,8 +319,8 @@
         <div class="alert alert-info mb-4" style="text-align: center">
             <i class="fas fa-info-circle"></i> Berdasarkan hasil perhitungan yang dilakukan menggunakan metode <em>Multi
                 Attribute Utility Theory</em> didapat hasil bahwa Batching Plant
-            <strong>"{{ $rankedResults[0]['plant']->namaplant }}"</strong> dari
-            <strong>{{ $rankedResults[0]['plant']->aub->namaaub ?? 'N/A' }}</strong>
+            <strong>"{{ $topPlant['plant']->namaplant ?? 'N/A' }}"</strong> dari
+            <strong>{{ $topPlant['plant']->aub->namaaub ?? 'N/A' }}</strong>
             direkomendasikan untuk <strong>DITUTUP.</strong> Segala
             bentuk pengambilan keputusan sepenuhnya tetap berada dalam wewenang stakeholder terkait.
         </div>

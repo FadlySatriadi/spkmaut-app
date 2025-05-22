@@ -7,7 +7,7 @@
         
         <div class="card">
             <div class="card-header">
-                <p>Berikan nilai untuk setiap kriteria (skala 1-10)</p>
+                <p>Berikan nilai untuk setiap kriteria (skala 0-5)</p>
             </div>
             <div class="card-body">
                 <table class="table table-bordered">
@@ -31,7 +31,7 @@
                                         <input type="number" 
                                                name="nilai[{{ $plant->idplant }}][{{ $criteria->idkriteria }}]" 
                                                class="form-control" 
-                                               min="0" max="10" 
+                                               min="0" max="5" 
                                                required>
                                     </td>
                                 @endforeach

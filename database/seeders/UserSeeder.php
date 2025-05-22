@@ -20,13 +20,14 @@ class UserSeeder extends Seeder
                 'username' => 'admin',
                 'nama' => 'Fadly',
                 'password' => Hash::make('12345'),
+                'role' => 'admin'
             ],
-            [
-                'iduser' => 2,
-                'username' => 'officer',
-                'nama' => 'Satriadi',
-                'password' => Hash::make('12345'),
-            ]
+            // [
+            //     'iduser' => 2,
+            //     'username' => 'officer',
+            //     'nama' => 'Satriadi',
+            //     'password' => Hash::make('12345'),
+            // ]
         ];
 
         DB::table('users')->insert($data);

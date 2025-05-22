@@ -55,56 +55,82 @@ class ORekomendasiController extends Controller
         // Hitung total bobot untuk normalisasi
         $totalBobot = $criterias->sum('bobotkriteria');
 
-        // Normalisasi bobot
+        // Normalisasi bobot kriteria
         $normalizedWeights = [];
         foreach ($criterias as $criteria) {
             $normalizedWeights[$criteria->idkriteria] = $criteria->bobotkriteria / $totalBobot;
         }
 
+        // Hitung nilai min dan max untuk setiap kriteria
+        $criteriaRanges = [];
+        foreach ($criterias as $criteria) {
+            $values = [];
+            foreach ($plants as $plant) {
+                if (isset($nilaiInput[$plant->idplant][$criteria->idkriteria])) {
+                    $values[] = $nilaiInput[$plant->idplant][$criteria->idkriteria];
+                }
+            }
+            $criteriaRanges[$criteria->idkriteria] = [
+                'min' => !empty($values) ? min($values) : 0,
+                'max' => !empty($values) ? max($values) : 0,
+                'type' => $criteria->jeniskriteria
+            ];
+        }
+
         // Proses perhitungan MAUT
         $results = [];
-        foreach ($plants as $plant) { // Mengubah $selectedPlants menjadi $plants
-            $utility = 0;
+        foreach ($plants as $plant) {
+            $totalUtility = 0;
             $detail = [];
 
             foreach ($criterias as $criteria) {
                 $nilai = $nilaiInput[$plant->idplant][$criteria->idkriteria] ?? 0;
+                $minValue = $criteriaRanges[$criteria->idkriteria]['min'];
+                $maxValue = $criteriaRanges[$criteria->idkriteria]['max'];
+                $range = $maxValue - $minValue;
 
-                // Normalisasi nilai (0-1)
-                $maxValue = $criterias->where('kodekriteria', $criteria->kodekriteria)->max('bobotkriteria') * 10;
-                $minValue = 0;
-
-                if ($criteria->jeniskriteria == 'benefit') {
-                    $normalizedValue = ($nilai - $minValue) / ($maxValue - $minValue);
-                } else { // cost
-                    $normalizedValue = ($maxValue - $nilai) / ($maxValue - $minValue);
+                // Normalisasi nilai (r*_ij)
+                if ($range == 0) {
+                    $normalizedValue = 0; // Handle division by zero
+                } else {
+                    if ($criteria->jeniskriteria == 'benefit') {
+                        $normalizedValue = (($nilai - $minValue) / ($maxValue - $minValue));
+                    } else { // cost
+                        $normalizedValue = 1 + (($minValue - $nilai) / ($maxValue - $minValue));
+                    }
                 }
 
-                // Hitung utility
-                $weightedUtility = $normalizedValue * $normalizedWeights[$criteria->idkriteria];
-                $utility += $weightedUtility;
+                // Hitung Utilitas Marginal (U_ij)
+                $marginalUtility = (exp(pow($normalizedValue, 2)) - 1) / 1.71;
+
+                // Hitung kontribusi kriteria dengan bobot (U_ij * W_j)
+                $weightedUtility = $marginalUtility * $normalizedWeights[$criteria->idkriteria];
+                $totalUtility += $weightedUtility;
 
                 $detail[] = [
                     'kode' => $criteria->kodekriteria,
                     'nama' => $criteria->namakriteria,
                     'jenis' => $criteria->jeniskriteria,
-                    'nilai_input' => $nilai, // Ubah key ini
+                    'nilai_input' => $nilai,
+                    'min' => $minValue,
+                    'max' => $maxValue,
                     'normalized' => $normalizedValue,
+                    'marginal_utility' => $marginalUtility, // Nilai utilitas marginal
                     'bobot' => $normalizedWeights[$criteria->idkriteria],
-                    'utility' => $weightedUtility
+                    'weighted_utility' => $weightedUtility
                 ];
             }
 
             $results[] = [
                 'plant' => $plant,
-                'total_utility' => $utility,
+                'total_utility' => $totalUtility,
                 'detail' => $detail
             ];
         }
 
-        // Urutkan berdasarkan utility tertinggi
+        // Urutkan berdasarkan total utility tertinggi
         usort($results, function ($a, $b) {
-            return $b['total_utility'] <=> $a['total_utility'];
+            return $a['total_utility'] <=> $b['total_utility'];
         });
 
         return $results;
@@ -178,16 +204,15 @@ class ORekomendasiController extends Controller
     {
         // 1. Validasi Data Session
         if (!session()->has('input_values') || !session()->has('selected_plants')) {
-            return redirect()->route('rekomendasi.select-plant')
+            return redirect()->route('officer.rekomendasi.select-plants')
                 ->with('error', 'Data sesi tidak lengkap. Silakan lakukan perhitungan ulang.');
         }
 
-        // 2. Ambil data dengan error handling
         try {
             $nilaiInput = session('input_values');
             $selectedPlants = session('selected_plants');
 
-            // 3. Validasi struktur data
+            // 2. Validasi struktur data
             if (!is_array($nilaiInput) || !is_array($selectedPlants)) {
                 throw new \Exception("Format data sesi tidak valid");
             }
@@ -195,74 +220,86 @@ class ORekomendasiController extends Controller
             $plants = PlantModel::whereIn('idplant', $selectedPlants)->get();
             $criterias = KriteriaModel::orderByRaw('LENGTH(kodekriteria), kodekriteria')->get();
 
-            // 4. Validasi data plant dan kriteria
+            // 3. Validasi data referensi
             if ($plants->isEmpty() || $criterias->isEmpty()) {
                 throw new \Exception("Data referensi tidak ditemukan");
             }
 
-            // 5. Perhitungan dengan logging
+            // 4. Hitung total bobot kriteria
             $totalBobot = $criterias->sum('bobotkriteria');
-
             if ($totalBobot <= 0) {
                 throw new \Exception("Total bobot kriteria tidak valid");
             }
 
-            // Normalisasi bobot
+            // Normalisasi bobot kriteria
             $normalizedWeights = $criterias->mapWithKeys(function ($criteria) use ($totalBobot) {
                 return [$criteria->idkriteria => $criteria->bobotkriteria / $totalBobot];
             })->all();
 
-            // Normalisasi nilai dengan handling division by zero
-            $normalized = [];
-            foreach ($plants as $plant) {
-                foreach ($criterias as $criteria) {
-                    $nilai = $nilaiInput[$plant->idplant][$criteria->idkriteria] ?? 0;
-                    $max = $criterias->where('kodekriteria', $criteria->kodekriteria)->max('bobotkriteria') * 10;
-                    $min = 0;
-                    $range = $max - $min;
-
-                    if ($range == 0) {
-                        $normalizedValue = 0; // Handle kasus pembagian nol
-                    } else {
-                        $normalizedValue = ($criteria->jeniskriteria == 'benefit')
-                            ? ($nilai - $min) / $range
-                            : ($max - $nilai) / $range;
-                    }
-
-                    $normalized[$plant->idplant][$criteria->idkriteria] = $normalizedValue;
-                }
+            // Hitung min/max tiap kriteria
+            $criteriaRanges = [];
+            foreach ($criterias as $criteria) {
+                $values = array_column($nilaiInput, $criteria->idkriteria);
+                $criteriaRanges[$criteria->idkriteria] = [
+                    'min' => !empty($values) ? min($values) : 0,
+                    'max' => !empty($values) ? max($values) : 0,
+                    'type' => $criteria->jeniskriteria
+                ];
             }
 
-            // Hitung utility
-            $utility = [];
+            // Proses MAUT: Normalisasi + Utilitas Marginal + Bobot
             $results = [];
             foreach ($plants as $plant) {
-                $total = 0;
+                $totalUtility = 0;
                 $details = [];
 
                 foreach ($criterias as $criteria) {
-                    $utilityValue = $normalized[$plant->idplant][$criteria->idkriteria]
-                        * $normalizedWeights[$criteria->idkriteria];
+                    $nilai = $nilaiInput[$plant->idplant][$criteria->idkriteria] ?? 0;
+                    $minValue = $criteriaRanges[$criteria->idkriteria]['min'];
+                    $maxValue = $criteriaRanges[$criteria->idkriteria]['max'];
+                    $range = $maxValue - $minValue;
+
+                    // Normalisasi nilai (r*_ij)
+                    if ($range == 0) {
+                        $normalizedValue = 0;
+                    } else {
+                        $normalizedValue = ($criteria->jeniskriteria == 'benefit')
+                            ? ($nilai - $minValue) / $range
+                            : 1 + (($minValue - $nilai) / $range);
+                    }
+
+                    // Hitung Utilitas Marginal (U_ij)
+                    $marginalUtility = (exp(pow($normalizedValue, 2)) - 1) / 1.71;
+
+                    // Hitung kontribusi kriteria (U_ij * W_j)
+                    $weightedUtility = $marginalUtility * $normalizedWeights[$criteria->idkriteria];
+                    $totalUtility += $weightedUtility;
 
                     $details[] = [
                         'kriteria_id' => $criteria->idkriteria,
-                        'utility' => $utilityValue
+                        'kode' => $criteria->kodekriteria,
+                        'nama' => $criteria->namakriteria,
+                        'jenis' => $criteria->jeniskriteria,
+                        'nilai_input' => $nilai,
+                        'min' => $minValue,
+                        'max' => $maxValue,
+                        'normalized' => $normalizedValue,
+                        'marginal_utility' => $marginalUtility, // Nilai U_ij
+                        'bobot' => $normalizedWeights[$criteria->idkriteria],
+                        'weighted_utility' => $weightedUtility // U_ij * W_j
                     ];
-
-                    $total += $utilityValue;
-                    $utility[$plant->idplant][$criteria->idkriteria] = $utilityValue;
                 }
 
                 $results[$plant->idplant] = [
                     'plant' => $plant,
-                    'total' => $total,
+                    'total_utility' => $totalUtility,
                     'detail' => $details
                 ];
             }
 
-            // 6. Ranking dengan handling tie score
+            // 5. Ranking hasil
             $rankedResults = collect($results)
-                ->sortByDesc('total')
+                ->sortBy('total_utility')
                 ->values()
                 ->map(function ($item, $index) {
                     $item['rank'] = $index + 1;
@@ -270,33 +307,48 @@ class ORekomendasiController extends Controller
                 })
                 ->all();
 
-            // Ambil plant dengan ranking 1
             $topPlant = $rankedResults[0] ?? null;
-            $activeMenu = 'rekomendasi';
+
+            $normalized = [];
+            foreach ($plants as $plant) {
+                foreach ($criterias as $criteria) {
+                    $detail = collect($results[$plant->idplant]['detail'])
+                        ->firstWhere('kriteria_id', $criteria->idkriteria);
+                    $normalized[$plant->idplant][$criteria->idkriteria] = $detail['normalized'];
+                }
+            }
+
+            // Prepare utility values array
+            $utility = [];
+            foreach ($plants as $plant) {
+                foreach ($criterias as $criteria) {
+                    $detail = collect($results[$plant->idplant]['detail'])
+                        ->firstWhere('kriteria_id', $criteria->idkriteria);
+                    $utility[$plant->idplant][$criteria->idkriteria] = $detail['weighted_utility'];
+                }
+            }
+
             return view('officer.rekomendasi.detail', [
                 'plants' => $plants,
                 'criterias' => $criterias,
                 'nilai' => $nilaiInput,
-                'normalizedWeights' => $normalizedWeights,
-                'normalized' => $normalized,
-                'utility' => $utility,
                 'results' => $results,
-                'topPlant' => $topPlant,
+                'criteriaRanges' => $criteriaRanges,
                 'rankedResults' => $rankedResults,
+                'normalizedWeights' => $normalizedWeights,
+                'normalized' => $normalized, // Add this line
+                'utility' => $utility,
+                'topPlant' => $topPlant,
                 'breadcrumb' => (object) [
-                    'title' => 'Detail Perhitungan',
+                    'title' => 'Detail Perhitungan MAUT',
                     'list' => ['DSS Batching Plant', 'Rekomendasi', 'Detail']
                 ],
                 'activeMenu' => 'rekomendasi'
             ]);
         } catch (\Exception $e) {
-            Log::error('Error in showDetail: ' . $e->getMessage(), [
-                'exception' => $e,
-                'session_data' => session()->all()
-            ]);
-
-            return redirect()->route('rekomendasi.select-plants')
-                ->with('error', 'Terjadi kesalahan sistem. Silakan coba lagi.');
+            Log::error('Error in showDetail: ' . $e->getMessage());
+            return redirect()->route('officer.rekomendasi.select-plants')
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
@@ -376,7 +428,7 @@ class ORekomendasiController extends Controller
                 'title' => 'Riwayat Rekomendasi',
                 'list' => ['DSS Batching Plant', 'Riwayat']
             ],
-            'activeMenu' => $activeMenu,    
+            'activeMenu' => $activeMenu,
         ]);
     }
 
@@ -396,7 +448,7 @@ class ORekomendasiController extends Controller
             $historyData = collect($histories)->firstWhere('timestamp', (int)$timestamp);
 
             if (!$historyData || !isset($historyData['all_data'])) {
-                return redirect()->route('rekomendasi.history')
+                return redirect()->route('officer.rekomendasi.cache-history')
                     ->with('error', 'Data riwayat tidak ditemukan atau format tidak valid');
             }
 
@@ -421,12 +473,12 @@ class ORekomendasiController extends Controller
                 throw new \Exception("Data kriteria tidak ditemukan");
             }
 
-            // Inisialisasi variabel
+            // Inisialisasi variabel untuk view
             $nilai = $allData['input_values'];
-            $normalizedWeights = [];
+            $results = [];
             $normalized = [];
             $utility = [];
-            $results = [];
+            $criteriaRanges = [];
 
             // Hitung total bobot kriteria
             $totalBobot = $criterias->sum('bobotkriteria');
@@ -435,61 +487,78 @@ class ORekomendasiController extends Controller
                 throw new \Exception("Total bobot kriteria tidak valid");
             }
 
-            // Normalisasi bobot kriteria (sama seperti di showDetail)
+            // Normalisasi bobot kriteria
+            $normalizedWeights = [];
             foreach ($criterias as $criteria) {
                 $normalizedWeights[$criteria->idkriteria] = $criteria->bobotkriteria / $totalBobot;
             }
 
-            // Normalisasi nilai (menggunakan logika dari showDetail)
-            foreach ($plants as $plant) {
-                foreach ($criterias as $criteria) {
-                    $nilaiInput = $nilai[$plant->idplant][$criteria->idkriteria] ?? 0;
-
-                    // PERUBAHAN PENTING: Gunakan cara perhitungan yang sama dengan showDetail
-                    $max = $criterias->where('kodekriteria', $criteria->kodekriteria)->max('bobotkriteria') * 10;
-                    $min = 0;
-                    $range = $max - $min;
-
-                    if ($range == 0) {
-                        $normalizedValue = 0; // Handle kasus pembagian nol
-                    } else {
-                        $normalizedValue = ($criteria->jeniskriteria == 'benefit')
-                            ? ($nilaiInput - $min) / $range
-                            : ($max - $nilaiInput) / $range;
+            // Hitung min/max untuk setiap kriteria
+            foreach ($criterias as $criteria) {
+                $values = [];
+                foreach ($plants as $plant) {
+                    if (isset($nilai[$plant->idplant][$criteria->idkriteria])) {
+                        $values[] = $nilai[$plant->idplant][$criteria->idkriteria];
                     }
-
-                    $normalized[$plant->idplant][$criteria->idkriteria] = $normalizedValue;
                 }
+
+                $criteriaRanges[$criteria->idkriteria] = [
+                    'min' => !empty($values) ? min($values) : 0,
+                    'max' => !empty($values) ? max($values) : 0,
+                    'type' => $criteria->jeniskriteria
+                ];
             }
 
-            // Hitung utility (sama seperti di showDetail)
+            // Proses perhitungan untuk setiap plant
             foreach ($plants as $plant) {
-                $total = 0;
+                $totalUtility = 0;
                 $details = [];
 
                 foreach ($criterias as $criteria) {
-                    $utilityValue = $normalized[$plant->idplant][$criteria->idkriteria]
-                        * $normalizedWeights[$criteria->idkriteria];
+                    $nilaiInput = $nilai[$plant->idplant][$criteria->idkriteria] ?? 0;
+                    $minValue = $criteriaRanges[$criteria->idkriteria]['min'];
+                    $maxValue = $criteriaRanges[$criteria->idkriteria]['max'];
+                    $range = $maxValue - $minValue;
+
+                    // Normalisasi nilai (r*_ij)
+                    if ($range == 0) {
+                        $normalizedValue = 0;
+                    } else {
+                        if ($criteria->jeniskriteria == 'benefit') {
+                            $normalizedValue = ($nilaiInput - $minValue) / $range;
+                        } else { // cost
+                            $normalizedValue = ($maxValue - $nilaiInput) / $range;
+                        }
+                    }
+
+                    // Hitung Utilitas Marginal (U_ij)
+                    $marginalUtility = (exp(pow($normalizedValue, 2)) - 1) / 1.71;
+
+                    // Hitung kontribusi kriteria dengan bobot (U_ij * W_j)
+                    $weightedUtility = $marginalUtility * $normalizedWeights[$criteria->idkriteria];
+                    $totalUtility += $weightedUtility;
+
+                    // Simpan data untuk view
+                    $normalized[$plant->idplant][$criteria->idkriteria] = $normalizedValue;
+                    $utility[$plant->idplant][$criteria->idkriteria] = $weightedUtility;
 
                     $details[] = [
                         'kriteria_id' => $criteria->idkriteria,
-                        'utility' => $utilityValue
+                        'marginal_utility' => $marginalUtility,
+                        'weighted_utility' => $weightedUtility
                     ];
-
-                    $total += $utilityValue;
-                    $utility[$plant->idplant][$criteria->idkriteria] = $utilityValue;
                 }
 
                 $results[$plant->idplant] = [
                     'plant' => $plant,
-                    'total' => $total,
+                    'total_utility' => $totalUtility,
                     'detail' => $details
                 ];
             }
 
-            // Ranking dengan cara yang sama seperti di showDetail
+            // Ranking hasil
             $rankedResults = collect($results)
-                ->sortByDesc('total')
+                ->sortBy('total_utility')
                 ->values()
                 ->map(function ($item, $index) {
                     $item['rank'] = $index + 1;
@@ -497,16 +566,21 @@ class ORekomendasiController extends Controller
                 })
                 ->all();
 
+            // Ambil plant terbaik
+            $topPlant = $rankedResults[0] ?? null;
+
             return view('officer.rekomendasi.cache-history-detail', [
                 'historyData' => $historyData,
                 'plants' => $plants,
                 'criterias' => $criterias,
                 'nilai' => $nilai,
-                'normalizedWeights' => $normalizedWeights,
                 'normalized' => $normalized,
                 'utility' => $utility,
                 'results' => $results,
                 'rankedResults' => $rankedResults,
+                'topPlant' => $topPlant,
+                'criteriaRanges' => $criteriaRanges,
+                'normalizedWeights' => $normalizedWeights,
                 'breadcrumb' => (object) [
                     'title' => 'Detail Riwayat Perhitungan',
                     'list' => ['DSS Batching Plant', 'Rekomendasi', 'Riwayat', 'Detail']
@@ -667,7 +741,7 @@ class ORekomendasiController extends Controller
 
         // Urutkan berdasarkan total_utility (descending)
         usort($results, function ($a, $b) {
-            return ($b['total_utility'] ?? 0) <=> ($a['total_utility'] ?? 0);
+            return ($a['total_utility'] ?? 0) <=> ($b['total_utility'] ?? 0);
         });
 
         // Tambahkan ranking

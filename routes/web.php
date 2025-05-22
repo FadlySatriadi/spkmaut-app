@@ -8,7 +8,6 @@ use App\Http\Controllers\KriteriaController;
 use App\Http\Controllers\OKriteriaController;
 use App\Http\Controllers\PlantController;
 use App\Http\Controllers\OPlantController;
-use App\Http\Controllers\AlternatifController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\RekomendasiController;
 use App\Http\Controllers\ORekomendasiController;
@@ -23,7 +22,6 @@ Route::middleware(['cek_login:admin'])->prefix('admin')->group(function () {
 Route::middleware(['cek_login:officer'])->prefix('officer')->group(function () {
     Route::get('/dashboard', [OfficerController::class, 'dashboard'])->name('officer.dashboard');
 });
-
 
 // Auth routes
 Route::get('login', [AuthController::class, 'index'])->name('login');
