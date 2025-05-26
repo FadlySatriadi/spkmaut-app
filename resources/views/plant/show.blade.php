@@ -19,6 +19,10 @@
                         <td>{{ $plant->kodeplant }}</td>
                     </tr>
                     <tr>
+                        <th>Kode Alternatif</th>
+                        <td>{{ $plant->kodealternatif }}</td>
+                    </tr>
+                    <tr>
                         <th>Nama Plant</th>
                         <td>{{ $plant->namaplant }}</td>
                     </tr>

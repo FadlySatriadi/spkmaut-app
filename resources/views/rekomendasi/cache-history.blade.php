@@ -2,6 +2,21 @@
 
 @section('content')
     <div class="container">
+        @if (session('success'))
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Sukses',
+                        text: '{{ session('success') }}',
+                        timer: 3000,
+                        showConfirmButton: false,
+                        position: 'top-end',
+                        toast: true
+                    });
+                });
+            </script>
+        @endif
         <div class="card">
             <div class="card-body">
                 @if (count($histories) > 0)

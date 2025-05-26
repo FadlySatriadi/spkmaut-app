@@ -69,9 +69,9 @@ class KriteriaController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'kodekriteria' => 'required|string|min:3|unique:kriteria,kodekriteria',
+            'kodekriteria' => 'required|string|min:2|unique:kriteria,kodekriteria',
             'namakriteria' => 'required|string|max:100',
-            'bobotkriteria' => 'required|numeric|min:0',
+            'bobotkriteria' => 'required|numeric|min:1|max:5',
             'jeniskriteria' => 'required|in:benefit,cost'
         ]);
 
@@ -124,15 +124,17 @@ class KriteriaController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'kodekriteria' => 'required|string|min:2',
+            'kodekriteria' => 'required|string|min:2|unique:kriteria,kodekriteria',
             'namakriteria' => 'required|string|max:100',
-            'bobotkriteria' => 'required|numeric'
+            'bobotkriteria' => 'required|numericmin:1|max:5',
+            'jeniskriteria' => 'required|in:benefit,cost',
         ]);
 
         KriteriaModel::find($id)->update([
             'kodekriteria' => $request->kodekriteria,
             'namakriteria' => $request->namakriteria,
-            'bobotkriteria' => $request->bobotkriteria
+            'bobotkriteria' => $request->bobotkriteria,
+            'jeniskriteria' => $request->jeniskriteria,
         ]);
         return redirect('/kriteria')->with('success', 'Data berhasil diubah');
     }

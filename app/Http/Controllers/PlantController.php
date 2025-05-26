@@ -76,6 +76,7 @@ class PlantController extends Controller
         $request->validate([
             'idaub' => 'required|exists:aub,idaub',
             'kodeplant' => 'required|string|min:3|unique:plant,kodeplant',
+            'kodealternatif' => 'required',
             'namaplant' => 'required|string|max:100',
             'status' => 'required',
         ]);
@@ -83,6 +84,7 @@ class PlantController extends Controller
         PlantModel::create([
             'idaub' => $request->idaub,
             'kodeplant' => $request->kodeplant,
+            'kodealternatif' => $request->kodealternatif,
             'namaplant' => $request->namaplant,
             'status'    => $request->status
         ]);

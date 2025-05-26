@@ -285,7 +285,7 @@
             {{-- <a href="{{ route('officer.rekomendasi.result') }}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Kembali
             </a> --}}
-            <form action="{{ route('officer.rekomendasi.save-cache') }}" method="POST">
+            <form action="{{ route('officer.rekomendasi.save-cache') }}" method="POST" id="saveHistoryForm">
                 @csrf
                 <button type="submit" class="btn btn-success" style="background-color: midnightblue; border:midnightblue">
                     <i class="fas fa-save"></i> Simpan ke Riwayat
@@ -296,5 +296,42 @@
                 </a>
             </form>
         </div>
+        @push('scripts')
+            <script>
+                $(document).ready(function() {
+                    // Handle form simpan ke riwayat
+                    $('#saveHistoryForm').submit(function(e) {
+                        e.preventDefault();
+
+                        Swal.fire({
+                            title: 'Menyimpan Data',
+                            html: 'Sedang menyimpan ke riwayat...',
+                            allowOutsideClick: false,
+                            showConfirmButton: false,
+                            willOpen: () => {
+                                Swal.showLoading();
+                            },
+                            didOpen: () => {
+                                // Submit form
+                                this.submit();
+                            }
+                        });
+                    });
+
+                    // Tampilkan pesan sukses jika ada
+                    @if (session('success'))
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Sukses',
+                            text: '{{ session('success') }}',
+                            timer: 3000,
+                            showConfirmButton: false,
+                            position: 'top-end',
+                            toast: true
+                        });
+                    @endif
+                });
+            </script>
+        @endpush
     </div>
 @endsection

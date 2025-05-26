@@ -2,6 +2,8 @@
 <html lang="en">
 
 <head>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <link rel="shortcut icon" href="{{ asset('lte/dist/img/signav.png') }}" type="image/x-icon">
     <link rel="icon" type="image/png" href="{{ asset('lte/dist/img/signav.png') }}">
     <style>
@@ -114,7 +116,8 @@
         <!-- Main Sidebar Container -->
         <aside class="main-sidebar sidebar-dark-primary elevation-4">
             <!-- Brand Logo -->
-            <a href="{{ url('/officer/dashboard') }}" class="brand-link text-center d-flex flex-column align-items-center">
+            <a href="{{ url('/officer/dashboard') }}"
+                class="brand-link text-center d-flex flex-column align-items-center">
                 <img src="{{ asset('lte/dist/img/sig.png') }}" alt="Logo" class="brand-image mb-2"
                     style="opacity: .9; width: 100px; height: 100px; object-fit: contain;">
                 <span class="brand-text" style="font-family: 'Poppins', sans-serif; font-weight: 700; color: wheat;">
@@ -148,8 +151,10 @@
     <script src="{{ asset('lte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <!-- AdminLTE App -->
     <script src="{{ asset('lte/dist/js/adminlte.min.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Select2 JS - Pastikan setelah jQuery -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         $(document).ready(function() {
             // Inisialisasi Select2 untuk semua elemen dengan class 'select2'
@@ -170,6 +175,7 @@
             });
         });
     </script>
+    @stack('scripts')
 </body>
 
 </html>

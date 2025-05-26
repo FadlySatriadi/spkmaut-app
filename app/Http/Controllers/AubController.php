@@ -123,18 +123,21 @@ class AubController extends Controller
 
     public function destroy($id)
     {
-        $check = AubModel::find($id);
-
-        if (!$check) {
-            return redirect('/aub')->with('error', 'Data tidak ditemukan');
-        }
-
         try {
-            AubModel::destroy($id);
+            $aub = AubModel::findOrFail($id);
+            $aub->delete();
+
+            if (request()->ajax()) {
+                return response()->json(['success' => true]);
+            }
 
             return redirect('/aub')->with('success', 'Data berhasil dihapus');
         } catch (\Exception $e) {
-            return redirect('/aub')->with('error', 'Data aub gagal dihapus karena masih terdapat tabel lain yang terkait dengan data ini');
+            if (request()->ajax()) {
+                return response()->json(['success' => false], 500);
+            }
+
+            return redirect('/aub')->with('error', 'Gagal menghapus data');
         }
     }
 }

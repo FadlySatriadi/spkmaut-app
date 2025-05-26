@@ -74,4 +74,14 @@
 @push('css')
 @endpush
 @push('js')
+    <script>
+        document.getElementById('bobotkriteria').addEventListener('input', function(e) {
+            if (parseFloat(this.value) > 5) {
+                this.setCustomValidity('Nilai maksimal bobot adalah 5');
+                this.reportValidity();
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+    </script>
 @endpush

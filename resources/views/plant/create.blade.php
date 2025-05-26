@@ -32,6 +32,16 @@
             </div>
           </div>
           <div class="form-group row">
+            <label class="col-1 control-label col-form-label">Kode Alternatif</label>
+            <div class="col-11">
+              <input type="text" class="form-control" style="border: 1px solid #800000;" id="kodealternatif" name="kodealternatif" value="{{ old('kodealternatif') }}"
+                required>
+              @error('kodealternatif')
+                <small class="form-text text-danger">{{ $message }}</small>
+              @enderror
+            </div>
+          </div>
+          <div class="form-group row">
             <label class="col-1 control-label col-form-label">Nama</label>
             <div class="col-11">
               <input type="text" class="form-control" style="border: 1px solid #800000;" id="namaplant" name="namaplant" value="{{ old('namaplant') }}"

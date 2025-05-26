@@ -12,13 +12,12 @@
     .table-hover tbody tr:hover {
         background-color: rgba(255, 204, 230, 0.3);
     }
-    
+
     .recommendation-text {
         color: #800000;
         font-weight: bold;
     }
-    
-    /* Center align text in status column */
+
     td:nth-child(5) {
         text-align: center;
         vertical-align: middle;
@@ -27,6 +26,26 @@
 
 @section('content')
     <div class="container">
+        @if (session('success'))
+            <script>
+                // Pastikan SweetAlert dipanggil setelah semua resource siap
+                window.addEventListener('load', function() {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Sukses!',
+                        text: '{{ session('success') }}',
+                        timer: 3000,
+                        timerProgressBar: true,
+                        showConfirmButton: false,
+                        position: 'top-end',
+                        toast: true,
+                        background: '#f8f9fa',
+                        iconColor: '#28a745'
+                    });
+                });
+            </script>
+        @endif
+
         <div class="card mb-4">
             <div class="card-body">
                 <table class="table table-bordered">
@@ -36,24 +55,23 @@
                             <th class="text-center">Kode Alternatif</th>
                             <th class="text-center">Nama Plant</th>
                             <th class="text-center">Total Utility</th>
-                            <th class="text-center">Status</th> <!-- Added text-center class -->
+                            <th class="text-center">Status</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($results as $index => $result)
                             <tr
-                                class="{{ $index === 0 ? 'bg-best-alternative' : '' }} 
-                                       {{ $index === 0 ? 'best-alternative' : '' }}">
+                                class="{{ $index === 0 ? 'bg-best-alternative' : '' }} {{ $index === 0 ? 'best-alternative' : '' }}">
                                 <td class="text-center">{{ $index + 1 }}</td>
                                 <td class="text-center">{{ $result['plant']->kodealternatif }}</td>
                                 <td class="text-center">{{ $result['plant']->namaplant }}</td>
                                 <td class="text-center">{{ number_format($result['total_utility'], 4) }}</td>
                                 <td>
-                                    @if($index === 0)
-                                    <span class="recommendation-text">
-                                        <i class="fas fa-exclamation-triangle recommendation-icon mr-2" style="color: #800000;"></i>Direkomendasikan
-                                        untuk ditutup
-                                    </span>
+                                    @if ($index === 0)
+                                        <span class="recommendation-text">
+                                            <i class="fas fa-exclamation-triangle recommendation-icon mr-2"
+                                                style="color: #800000;"></i>Direkomendasikan untuk ditutup
+                                        </span>
                                     @endif
                                 </td>
                             </tr>
@@ -62,37 +80,59 @@
                 </table>
             </div>
         </div>
+
         <div class="mt-4">
-            <form action="{{ route('officer.rekomendasi.save-cache') }}" method="POST">
+            <form action="{{ route('officer.rekomendasi.save-cache') }}" method="POST" id="saveHistoryForm">
                 @csrf
                 <button type="submit" class="btn btn-success" style="background-color: midnightblue; border:midnightblue">
                     <i class="fas fa-save"></i> Simpan ke Riwayat
                 </button>
-                <a href="{{ route('officer.rekomendasi.detail') }}" class="btn btn-primary" style="background-color: #800000; border:#800000">
+                <a href="{{ route('officer.rekomendasi.detail') }}" class="btn btn-primary"
+                    style="background-color: #800000; border:#800000">
                     <i class="fas fa-calculator"></i> Lihat Detail Perhitungan
                 </a>
-                <a href="{{ route('officer.rekomendasi.cetak') }}" class="btn btn-primary" style="background-color: darkgoldenrod; border:darkgoldenrod">
+                <a href="{{ route('officer.rekomendasi.cetak') }}" class="btn btn-primary"
+                    style="background-color: darkgoldenrod; border:darkgoldenrod">
                     <i class="fas fa-print"></i> Cetak PDF
                 </a>
             </form>
         </div>
-    </div>
+        @push('scripts')
+            <script>
+                $(document).ready(function() {
+                    // Handle form simpan ke riwayat
+                    $('#saveHistoryForm').submit(function(e) {
+                        e.preventDefault();
 
-    @push('scripts')
-        <script>
-            $(document).ready(function() {
-                $('.detail-btn').click(function() {
-                    let index = $(this).data('index');
-                    $('#detail-' + index).toggle();
+                        Swal.fire({
+                            title: 'Menyimpan Data',
+                            html: 'Sedang menyimpan ke riwayat...',
+                            allowOutsideClick: false,
+                            showConfirmButton: false,
+                            willOpen: () => {
+                                Swal.showLoading();
+                            },
+                            didOpen: () => {
+                                // Submit form
+                                this.submit();
+                            }
+                        });
+                    });
 
-                    // Ganti teks tombol
-                    if ($(this).text() === 'Detail Perhitungan') {
-                        $(this).text('Sembunyikan Detail');
-                    } else {
-                        $(this).text('Detail Perhitungan');
-                    }
+                    // Tampilkan pesan sukses jika ada
+                    @if (session('success'))
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Sukses',
+                            text: '{{ session('success') }}',
+                            timer: 3000,
+                            showConfirmButton: false,
+                            position: 'top-end',
+                            toast: true
+                        });
+                    @endif
                 });
-            });
-        </script>
-    @endpush
+            </script>
+        @endpush
+    </div>
 @endsection

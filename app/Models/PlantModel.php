@@ -16,6 +16,7 @@ class PlantModel extends Model
         'idplant',
         'idaub',
         'namaplant',
+        'kodealternatif',
         'kodeplant',
         'status',
     ];

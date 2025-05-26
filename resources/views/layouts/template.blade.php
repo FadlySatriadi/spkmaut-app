@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <link rel="shortcut icon" href="{{ asset('lte/dist/img/signav.png') }}" type="image/x-icon">
     <link rel="icon" type="image/png" href="{{ asset('lte/dist/img/signav.png') }}">
     <style>
@@ -114,7 +115,8 @@
         <!-- Main Sidebar Container -->
         <aside class="main-sidebar sidebar-dark-primary elevation-4">
             <!-- Brand Logo -->
-            <a href="{{ url('/admin/dashboard') }}" class="brand-link text-center d-flex flex-column align-items-center">
+            <a href="{{ url('/admin/dashboard') }}"
+                class="brand-link text-center d-flex flex-column align-items-center">
                 <img src="{{ asset('lte/dist/img/sig.png') }}" alt="Logo" class="brand-image mb-2"
                     style="opacity: .9; width: 100px; height: 100px; object-fit: contain;">
                 <span class="brand-text" style="font-family: 'Poppins', sans-serif; font-weight: 700; color: wheat;">
@@ -170,6 +172,71 @@
             });
         });
     </script>
+    <script>
+        $(document).ready(function() {
+            // Tangani form delete
+            $('.delete-form').on('submit', function(e) {
+                e.preventDefault();
+
+                Swal.fire({
+                    title: 'Apakah Anda yakin?',
+                    text: "Data akan dihapus secara permanen!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#800000',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Ya, hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Jika user mengkonfirmasi, submit form
+                        $.ajax({
+                            url: $(this).attr('action'),
+                            type: 'POST',
+                            data: $(this).serialize(),
+                            success: function(response) {
+                                Swal.fire(
+                                    'Terhapus!',
+                                    'Data berhasil dihapus.',
+                                    'success'
+                                ).then(() => {
+                                    // Reload halaman setelah alert ditutup
+                                    location.reload();
+                                });
+                            },
+                            error: function(xhr) {
+                                Swal.fire(
+                                    'Gagal!',
+                                    'Terjadi kesalahan saat menghapus data.',
+                                    'error'
+                                );
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Tampilkan notifikasi success dari session
+            @if (session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Sukses',
+                    text: '{{ session('success') }}',
+                    confirmButtonColor: '#800000'
+                });
+            @endif
+
+            @if (session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: '{{ session('error') }}',
+                    confirmButtonColor: '#800000'
+                });
+            @endif
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 
 </html>

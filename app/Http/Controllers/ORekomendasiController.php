@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\PlantModel;
 use App\Models\KriteriaModel;
-use App\Models\HistoryModel;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Auth;
@@ -27,7 +26,7 @@ class ORekomendasiController extends Controller
         $validated = $request->validate([
             'nilai' => 'required|array',
             'nilai.*' => 'required|array',
-            'nilai.*.*' => 'required|numeric|min:0|max:10'
+            'nilai.*.*' => 'required|numeric|min:1|max:5'
         ]);
 
         session(['input_values' => $validated['nilai']]);
@@ -41,13 +40,17 @@ class ORekomendasiController extends Controller
         $results = $this->calculateMaut($request->nilai, $plants, $criterias);
         session(['calculation_results' => $results]);
 
+        Log::debug('Session data before response', [
+            'input_values' => session('input_values'),
+            'calculation_results' => session('calculation_results')
+        ]);
         // Tampilkan hasil
         return view('officer.rekomendasi.result', [
             'breadcrumb' => $breadcrumb,
             'results' => $results,
             'criterias' => $criterias,
             'activeMenu' => $activeMenu
-        ]);
+        ])->with('success', 'Berhasil melakukan perhitungan rekomendasi');
     }
 
     private function calculateMaut($nilaiInput, $plants, $criterias)
@@ -161,10 +164,15 @@ class ORekomendasiController extends Controller
 
     public function storePlants(Request $request)
     {
-        $request->validate([
-            'plants' => 'required|array',
-            'plants.*' => 'exists:plant,idplant'
-        ]);
+        $request->validate(
+            [
+                'plants' => 'required|array|min:2',
+                'plants.*' => 'exists:plant,idplant'
+            ],
+            [
+                'plants.min' => 'Pilih minimal 2 Plant untuk dinilai'
+            ]
+        );
 
         // Simpan ke session
         session(['selected_plants' => $request->plants]);
@@ -184,9 +192,9 @@ class ORekomendasiController extends Controller
         // Ambil dari session
         $plantIds = session('selected_plants');
 
-        if (!$plantIds) {
+        if (!$plantIds || count($plantIds) < 2) {
             return redirect()->route('officer.rekomendasi.select-plants')
-                ->with('error', 'Silakan pilih plant terlebih dahulu');
+                ->with('error', 'Silakan pilih minimal 2 plant terlebih dahulu');
         }
 
         $plants = PlantModel::whereIn('idplant', $plantIds)->get();
@@ -404,7 +412,7 @@ class ORekomendasiController extends Controller
         Cache::put($cacheKey, array_slice($existingHistories, 0, 20), now()->addDays(30));
 
         return redirect()->route('officer.rekomendasi.cache-history')
-            ->with('success', 'Rekomendasi berhasil disimpan di riwayat');
+            ->with('success', 'Rekomendasi berhasil disimpan');
     }
 
     public function showCacheHistory()
