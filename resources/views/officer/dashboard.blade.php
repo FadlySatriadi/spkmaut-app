@@ -228,7 +228,7 @@
                                 Metode ini sangat cocok diterapkan ketika setiap kriteria memiliki <strong>tingkat
                                     kepentingan (bobot)</strong> yang berbeda,
                                 serta memiliki satuan nilai yang tidak sama — seperti biaya (rupiah), jarak (kilometer),
-                                atau kualitas (skala 1-10).
+                                atau kualitas (skala 1-5).
                             </p>
 
                             <div>Keunggulan Metode MAUT</div>
