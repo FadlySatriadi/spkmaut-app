@@ -24,7 +24,7 @@
             <table class="table table-bordered table-striped table-hover table-sm">
                 <thead>
                     <tr>
-                        <th class="text-center">ID AUB</th>
+                        <th class="text-center">No</th>
                         <th class="text-center">Kode AUB</th>
                         <th class="text-center">Nama AUB</th>
                         <th class="text-center">Aksi</th>
@@ -33,7 +33,7 @@
                 <tbody>
                     @foreach($aub as $item)
                     <tr>
-                        <td class="text-center">{{ $item->idaub }}</td>
+                        <td class="text-center">{{ $loop->iteration }}</td>
                         <td class="text-center">{{ $item->kodeaub }}</td>
                         <td class="text-center">{{ $item->namaaub }}</td>
                         <td class="text-center">

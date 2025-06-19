@@ -74,7 +74,47 @@
                 </div>
             @endif
             <div class="alert alert-info mb-4" style="text-align: center">
-                <i class="fas fa-info-circle"></i> Data ini diambil dari riwayat perhitungan pada : {{ $historyData['date'] }}
+                <i class="fas fa-info-circle"></i> Data ini diambil dari riwayat perhitungan pada :
+                {{ $historyData['date'] }}
+            </div>
+
+            <!-- Tabel Bobot Kriteria -->
+            <div class="card mb-4">
+                <div class="card-header card-header-maroon">
+                    <h5 class="text-center">Perbandingan Bobot Kriteria</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Kode Kriteria</th>
+                                    <th>Nama Kriteria</th>
+                                    <th>Jenis</th>
+                                    <th>Bobot ROC</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($criterias->sortByDesc('bobotkriteria') as $criteria)
+                                    <tr>
+                                        <td>{{ $criteria->kodekriteria }}</td>
+                                        <td>{{ $criteria->namakriteria }}</td>
+                                        <td>{{ ucfirst($criteria->jeniskriteria) }}</td>
+                                        <td>{{ number_format($rocWeights[$criteria->idkriteria] ?? 0, 4) }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="3" class="text-right"><strong>Total</strong></td>
+                                    <td>{{ number_format(array_sum($rocWeights), 4) }}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <p class="mt-3"><em>Metode ROC (Rank Order Centroid) digunakan untuk normalisasi bobot berdasarkan
+                            peringkat kriteria</em></p>
+                </div>
             </div>
 
             <!-- 1. Tabel Identifikasi Kriteria dan Alternatif -->
@@ -181,7 +221,7 @@
                                     <tr>
                                         <td><strong>{{ $plant->kodealternatif }}</strong></td>
                                         @foreach ($criterias as $criteria)
-                                            <td>{{ number_format($normalized[$plant->idplant][$criteria->idkriteria], 2) }}
+                                            <td>{{ number_format($normalized[$plant->idplant][$criteria->idkriteria] ?? 0, 2) }}
                                             </td>
                                         @endforeach
                                     </tr>
@@ -201,7 +241,10 @@
                     <h5 class="text-center">Perhitungan Utilitas Marginal</h5>
                 </div>
                 <div class="card-body">
-
+                    <div class="formula-box">
+                        <strong>Rumus Utilitas Marginal:</strong> U<sub>ij</sub> = (e<sup>(r*<sub>ij</sub>)²</sup> - 1) /
+                        1.71
+                    </div>
                     <div class="table-responsive">
                         <table class="table table-bordered">
                             <thead class="table-dark">
@@ -229,10 +272,6 @@
                                 @endforeach
                             </tbody>
                         </table>
-                        <div class="formula-box">
-                        <em>Rumus Utilitas Marginal : U<sub>ij</sub> = (e<sup>(r*<sub>ij</sub>)²</sup> - 1) /
-                            1.71</em>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -259,7 +298,8 @@
                                     <tr>
                                         <td><strong>{{ $plant->kodealternatif }}</strong></td>
                                         @foreach ($criterias as $criteria)
-                                            <td>{{ number_format($utility[$plant->idplant][$criteria->idkriteria], 3) }}</td>
+                                            <td>{{ number_format($utility[$plant->idplant][$criteria->idkriteria], 3) }}
+                                            </td>
                                         @endforeach
                                         <td class="table-success">
                                             {{ number_format($results[$plant->idplant]['total_utility'], 5) }}
@@ -294,7 +334,7 @@
                             @foreach ($rankedResults as $index => $result)
                                 <tr
                                     class="{{ $index === 0 ? 'bg-best-alternative' : '' }} 
-                                {{ $index === 0 ? 'best-alternative' : '' }}">
+                               {{ $index === 0 ? 'best-alternative' : '' }}">
                                     <td>{{ $index + 1 }}</td>
                                     <td>{{ $result['plant']->kodealternatif }}</td>
                                     <td>{{ $result['plant']->aub->namaaub }}</td>
@@ -329,7 +369,7 @@
                 <a href="{{ route('officer.rekomendasi.cache-history') }}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> Kembali ke Riwayat
                 </a>
-                <a href="{{ route('officer.rekomendasi.print-history', $timestamp) }}" class="btn btn-secondary"
+                <a href="{{ route('officer.rekomendasi.print-history', $timestamp) }}" class="btn btn-primary"
                     style="background-color: #800000; color: white; border: 1px solid #800000;">
                     <i class="fas fa-file-pdf"></i> Cetak PDF
                 </a>

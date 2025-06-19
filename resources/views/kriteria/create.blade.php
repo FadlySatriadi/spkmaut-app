@@ -26,7 +26,7 @@
                     </div>
                 </div>
                 <div class="form-group row">
-                    <label class="col-1 control-label col-form-label">Bobot Kriteria</label>
+                    <label class="col-1 control-label col-form-label">Urutan</label>
                     <div class="col-11">
                         <input type="number" step="0.01" class="form-control" style="border: 1px solid #800000;"
                             id="bobotkriteria" name="bobotkriteria" value="{{ old('bobotkriteria') }}" required

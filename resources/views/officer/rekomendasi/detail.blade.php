@@ -35,6 +35,45 @@
         }
     </style>
     <div class="container">
+        <!-- Tabel Bobot Kriteria -->
+        <div class="card mb-4">
+            <div class="card-header card-header-maroon">
+                <h5 class="text-center">Perbandingan Bobot Kriteria</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Kode Kriteria</th>
+                                <th>Nama Kriteria</th>
+                                <th>Jenis</th>
+                                <th>Bobot ROC</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($criterias->sortByDesc('bobotkriteria') as $criteria)
+                                <tr>
+                                    <td>{{ $criteria->kodekriteria }}</td>
+                                    <td>{{ $criteria->namakriteria }}</td>
+                                    <td>{{ ucfirst($criteria->jeniskriteria) }}</td>
+                                    <td>{{ number_format($rocWeights[$criteria->idkriteria] ?? 0, 4) }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" class="text-right"><strong>Total</strong></td>
+                                <td>{{ number_format(array_sum($rocWeights), 4) }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <p class="mt-3"><em>Metode ROC (Rank Order Centroid) digunakan untuk normalisasi bobot berdasarkan
+                        peringkat kriteria</em></p>
+            </div>
+        </div>
+
         <!-- 1. Tabel Identifikasi Kriteria dan Alternatif -->
         <div class="card mb-4">
             <div class="card-header card-header-maroon">
@@ -139,7 +178,7 @@
                                 <tr>
                                     <td><strong>{{ $plant->kodealternatif }}</strong></td>
                                     @foreach ($criterias as $criteria)
-                                        <td>{{ number_format($normalized[$plant->idplant][$criteria->idkriteria], 2) }}
+                                        <td>{{ number_format($normalized[$plant->idplant][$criteria->idkriteria] ?? 0, 2) }}
                                         </td>
                                     @endforeach
                                 </tr>

@@ -27,7 +27,7 @@
                         <th class="text-center">No</th>
                         <th class="text-center">Kode Kriteria</th>
                         <th class="text-center">Nama Kriteria</th>
-                        <th class="text-center">Bobot</th>
+                        <th class="text-center">Urutan</th>
                         <th class="text-center">Bobot Normalisasi</th>
                         <th class="text-center">Jenis Kriteria</th>
                         <th class="text-center">Aksi</th>
@@ -36,7 +36,7 @@
                 <tbody>
                     @foreach($kriteria as $item)
                     <tr>
-                        <td class="text-center">{{ $item->idkriteria }}</td>
+                        <td class="text-center">{{ $loop->iteration }}</td>
                         <td class="text-center">{{ $item->kodekriteria }}</td>
                         <td class="text-center">{{ $item->namakriteria }}</td>
                         <td class="text-center">{{ $item->bobotkriteria }}</td>
@@ -56,7 +56,7 @@
                     @endforeach
                     <tr style="font-weight: bold;">
                         <td colspan="3" class="text-center">TOTAL</td>
-                        <td class="text-center">{{ number_format($totalBobot) }}</td>
+                        <td class="text-center">-</td>
                         <td class="text-center">{{ number_format($totalBobotNormalisasi, 1) }}</td>
                         <td></td>
                     </tr>

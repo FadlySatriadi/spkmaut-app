@@ -148,8 +148,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="{{ url('/okriteria') }}"
-                                class="nav-link {{ $activeMenu == 'okriteria' ? 'active' : '' }}">
+                            <a href="{{ url('/okriteria') }}" class="nav-link {{ $activeMenu == 'okriteria' ? 'active' : '' }}">
                                 <i class="nav-icon fa fa-envelope"></i>
                                 <p>Kriteria</p>
                             </a>

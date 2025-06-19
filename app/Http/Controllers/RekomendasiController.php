@@ -467,10 +467,25 @@ class RekomendasiController extends Controller
                 throw new \Exception("Data plant tidak ditemukan");
             }
 
-            $criterias = KriteriaModel::orderByRaw('LENGTH(kodekriteria), kodekriteria')->get();
+            $criterias = KriteriaModel::orderBy('bobotkriteria', 'desc')->get();
 
             if ($criterias->isEmpty()) {
                 throw new \Exception("Data kriteria tidak ditemukan");
+            }
+
+            // Calculate ROC weights
+            $n = $criterias->count();
+            $rocWeights = [];
+            foreach ($criterias as $index => $criteria) {
+                $rank = $index + 1;
+                $rocWeight = 0;
+
+                for ($i = $rank; $i <= $n; $i++) {
+                    $rocWeight += 1 / $i;
+                }
+                $rocWeight = $rocWeight / $n;
+
+                $rocWeights[$criteria->idkriteria] = $rocWeight;
             }
 
             // Inisialisasi variabel untuk view
@@ -535,7 +550,7 @@ class RekomendasiController extends Controller
                     $marginalUtility = (exp(pow($normalizedValue, 2)) - 1) / 1.71;
 
                     // Hitung kontribusi kriteria dengan bobot (U_ij * W_j)
-                    $weightedUtility = $marginalUtility * $normalizedWeights[$criteria->idkriteria];
+                    $weightedUtility = $marginalUtility * $rocWeights[$criteria->idkriteria];
                     $totalUtility += $weightedUtility;
 
                     // Simpan data untuk view
@@ -581,6 +596,7 @@ class RekomendasiController extends Controller
                 'topPlant' => $topPlant,
                 'criteriaRanges' => $criteriaRanges,
                 'normalizedWeights' => $normalizedWeights,
+                'rocWeights' => $rocWeights, // Make sure this is passed to the view
                 'breadcrumb' => (object) [
                     'title' => 'Detail Riwayat Perhitungan',
                     'list' => ['DSS Batching Plant', 'Rekomendasi', 'Riwayat', 'Detail']

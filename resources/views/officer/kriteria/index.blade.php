@@ -30,7 +30,7 @@
                 <tbody>
                     @foreach($okriteria as $item)
                     <tr>
-                        <td class="text-center">{{ $item->idkriteria }}</td>
+                        <td class="text-center">{{ $loop->iteration }}</td>
                         <td class="text-center">{{ $item->kodekriteria }}</td>
                         <td class="text-center">{{ $item->namakriteria }}</td>
                         <td class="text-center">{{ $item->bobotkriteria }}</td>

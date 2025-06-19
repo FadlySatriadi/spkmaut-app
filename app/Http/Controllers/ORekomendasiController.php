@@ -14,7 +14,6 @@ class ORekomendasiController extends Controller
 {
     public function calculate(Request $request)
     {
-
         $breadcrumb = (object) [
             'title' => 'Pilih Plant',
             'list' => ['DSS Batching Plant', 'Rekomendasi', 'Pilih Plant']
@@ -22,13 +21,48 @@ class ORekomendasiController extends Controller
 
         $activeMenu = 'rekomendasi';
 
-        // Validasi
-        $validated = $request->validate([
-            'nilai' => 'required|array',
-            'nilai.*' => 'required|array',
-            'nilai.*.*' => 'required|numeric|min:1|max:5'
-        ]);
+        // Daftar nilai maksimal untuk validasi
+        $maxValues = [
+            'C1' => 5,
+            'C2' => 4,
+            'C3' => 4,
+            'C4' => 3,
+            'C5' => 4,
+            'C6' => 3,
+            'C7' => 4,
+            'C8' => 5,
+            'C9' => 4,
+            'C10' => 4,
+            'C11' => 3,
+            'C12' => 4,
+            'C13' => 5
+        ];
 
+        // Ambil semua kriteria untuk validasi
+        $allCriterias = KriteriaModel::all()->keyBy('idkriteria');
+
+        // Buat rules validasi dinamis
+        $rules = ['nilai' => 'required|array'];
+        $customMessages = [];
+
+        foreach ($allCriterias as $id => $criteria) {
+            $max = $maxValues[$criteria->kodekriteria] ?? 5;
+
+            $rules["nilai.*.{$id}"] = [
+                'required',
+                'numeric',
+                'min:1',
+                "max:{$max}"
+            ];
+
+            $customMessages["nilai.*.{$id}.max"] = "Nilai untuk kriteria {$criteria->kodekriteria} tidak boleh lebih dari {$max}";
+            $customMessages["nilai.*.{$id}.min"] = "Nilai untuk kriteria {$criteria->kodekriteria} tidak boleh kurang dari 1";
+        }
+
+        // Validasi input
+        $validated = $request->validate($rules, $customMessages);
+
+        // Simpan nilai input ke session
         session(['input_values' => $validated['nilai']]);
 
         // Ambil data dari session
@@ -37,13 +71,9 @@ class ORekomendasiController extends Controller
         $criterias = KriteriaModel::all();
 
         // Lakukan perhitungan MAUT
-        $results = $this->calculateMaut($request->nilai, $plants, $criterias);
+        $results = $this->calculateMaut($validated['nilai'], $plants, $criterias);
         session(['calculation_results' => $results]);
 
-        Log::debug('Session data before response', [
-            'input_values' => session('input_values'),
-            'calculation_results' => session('calculation_results')
-        ]);
         // Tampilkan hasil
         return view('officer.rekomendasi.result', [
             'breadcrumb' => $breadcrumb,
@@ -133,7 +163,7 @@ class ORekomendasiController extends Controller
 
         // Urutkan berdasarkan total utility tertinggi
         usort($results, function ($a, $b) {
-            return $a['total_utility'] <=> $b['total_utility'];
+            return $b['total_utility'] <=> $a['total_utility'];
         });
 
         return $results;
@@ -198,7 +228,31 @@ class ORekomendasiController extends Controller
         }
 
         $plants = PlantModel::whereIn('idplant', $plantIds)->get();
-        $criterias = KriteriaModel::orderByRaw('LENGTH(kodekriteria), kodekriteria')->get();
+
+        // Daftar nilai maksimal untuk setiap kriteria
+        $maxValues = [
+            'C1' => 5,  // Available Market
+            'C2' => 4,  // Utilisasi Plant
+            'C3' => 4,  // Avail Raw Material
+            'C4' => 3,  // Break Even Point
+            'C5' => 4,  // Kedekatan dengan Pasar
+            'C6' => 3,  // Keamanan Investasi
+            'C7' => 4,  // Biaya Investasi
+            'C8' => 5,  // Biaya Operasional
+            'C9' => 4,  // Dampak Lingkungan
+            'C10' => 4, // Kebisingan dan Polusi
+            'C11' => 3, // Kesesuaian Regulasi
+            'C12' => 4, // Kompetisi Pasar
+            'C13' => 5  // Aksesibilitas
+        ];
+
+        $criterias = KriteriaModel::orderByRaw('LENGTH(kodekriteria), kodekriteria')
+            ->get()
+            ->map(function ($criteria) use ($maxValues) {
+                // Tambahkan nilai maksimal ke setiap kriteria
+                $criteria->max_value = $maxValues[$criteria->kodekriteria] ?? 5;
+                return $criteria;
+            });
 
         return view('officer.rekomendasi.input-nilai', [
             'breadcrumb' => $breadcrumb,
@@ -210,7 +264,7 @@ class ORekomendasiController extends Controller
 
     public function showDetail()
     {
-        // 1. Validasi Data Session
+        // 1. Validate session data
         if (!session()->has('input_values') || !session()->has('selected_plants')) {
             return redirect()->route('officer.rekomendasi.select-plants')
                 ->with('error', 'Data sesi tidak lengkap. Silakan lakukan perhitungan ulang.');
@@ -220,31 +274,47 @@ class ORekomendasiController extends Controller
             $nilaiInput = session('input_values');
             $selectedPlants = session('selected_plants');
 
-            // 2. Validasi struktur data
+            // 2. Validate data structure
             if (!is_array($nilaiInput) || !is_array($selectedPlants)) {
                 throw new \Exception("Format data sesi tidak valid");
             }
 
             $plants = PlantModel::whereIn('idplant', $selectedPlants)->get();
-            $criterias = KriteriaModel::orderByRaw('LENGTH(kodekriteria), kodekriteria')->get();
+            $criterias = KriteriaModel::orderBy('bobotkriteria', 'desc')->get();
 
-            // 3. Validasi data referensi
+            // 3. Validate reference data
             if ($plants->isEmpty() || $criterias->isEmpty()) {
                 throw new \Exception("Data referensi tidak ditemukan");
             }
 
-            // 4. Hitung total bobot kriteria
+            // 4. Calculate ROC weights
+            $n = $criterias->count();
+            $rocWeights = [];
+
+            foreach ($criterias as $index => $criteria) {
+                $rank = $index + 1;
+                $rocWeight = 0;
+
+                for ($i = $rank; $i <= $n; $i++) {
+                    $rocWeight += 1 / $i;
+                }
+                $rocWeight = $rocWeight / $n;
+
+                $rocWeights[$criteria->idkriteria] = $rocWeight;
+            }
+
+            // 5. Calculate total weight for normalization
             $totalBobot = $criterias->sum('bobotkriteria');
             if ($totalBobot <= 0) {
                 throw new \Exception("Total bobot kriteria tidak valid");
             }
 
-            // Normalisasi bobot kriteria
+            // Normalize weights
             $normalizedWeights = $criterias->mapWithKeys(function ($criteria) use ($totalBobot) {
                 return [$criteria->idkriteria => $criteria->bobotkriteria / $totalBobot];
             })->all();
 
-            // Hitung min/max tiap kriteria
+            // Calculate min/max for each criteria
             $criteriaRanges = [];
             foreach ($criterias as $criteria) {
                 $values = array_column($nilaiInput, $criteria->idkriteria);
@@ -255,10 +325,15 @@ class ORekomendasiController extends Controller
                 ];
             }
 
-            // Proses MAUT: Normalisasi + Utilitas Marginal + Bobot
+            // MAUT calculation process
             $results = [];
+            $normalized = [];
+            $utility = [];
+            $utilityROC = []; // For ROC-based utility calculation
+
             foreach ($plants as $plant) {
                 $totalUtility = 0;
+                $totalUtilityROC = 0; // For ROC-based total
                 $details = [];
 
                 foreach ($criterias as $criteria) {
@@ -267,7 +342,7 @@ class ORekomendasiController extends Controller
                     $maxValue = $criteriaRanges[$criteria->idkriteria]['max'];
                     $range = $maxValue - $minValue;
 
-                    // Normalisasi nilai (r*_ij)
+                    // Normalize value (r*_ij)
                     if ($range == 0) {
                         $normalizedValue = 0;
                     } else {
@@ -276,12 +351,16 @@ class ORekomendasiController extends Controller
                             : 1 + (($minValue - $nilai) / $range);
                     }
 
-                    // Hitung Utilitas Marginal (U_ij)
+                    // Calculate Marginal Utility (U_ij)
                     $marginalUtility = (exp(pow($normalizedValue, 2)) - 1) / 1.71;
 
-                    // Hitung kontribusi kriteria (U_ij * W_j)
-                    $weightedUtility = $marginalUtility * $normalizedWeights[$criteria->idkriteria];
+                    // Calculate criteria contribution with weight (U_ij * W_j)
+                    $weightedUtility = $marginalUtility * $rocWeights[$criteria->idkriteria];
                     $totalUtility += $weightedUtility;
+
+                    // Calculate with ROC weights
+                    $weightedUtilityROC = $marginalUtility * $rocWeights[$criteria->idkriteria];
+                    $totalUtilityROC += $weightedUtilityROC;
 
                     $details[] = [
                         'kriteria_id' => $criteria->idkriteria,
@@ -292,10 +371,12 @@ class ORekomendasiController extends Controller
                         'min' => $minValue,
                         'max' => $maxValue,
                         'normalized' => $normalizedValue,
-                        'marginal_utility' => $marginalUtility, // Nilai U_ij
-                        'bobot' => $normalizedWeights[$criteria->idkriteria],
-                        'weighted_utility' => $weightedUtility // U_ij * W_j
+                        'marginal_utility' => $marginalUtility,
+                        'bobot' => $rocWeights[$criteria->idkriteria],
+                        'weighted_utility' => $weightedUtility,
                     ];
+
+                    $utility[$plant->idplant][$criteria->idkriteria] = $weightedUtility;
                 }
 
                 $results[$plant->idplant] = [
@@ -305,7 +386,7 @@ class ORekomendasiController extends Controller
                 ];
             }
 
-            // 5. Ranking hasil
+            // Ranking results
             $rankedResults = collect($results)
                 ->sortBy('total_utility')
                 ->values()
@@ -315,26 +396,17 @@ class ORekomendasiController extends Controller
                 })
                 ->all();
 
+            $rankedResultsROC = collect($results)
+                ->sortBy('total_utility_roc')
+                ->values()
+                ->map(function ($item, $index) {
+                    $item['rank_roc'] = $index + 1;
+                    return $item;
+                })
+                ->all();
+
             $topPlant = $rankedResults[0] ?? null;
-
-            $normalized = [];
-            foreach ($plants as $plant) {
-                foreach ($criterias as $criteria) {
-                    $detail = collect($results[$plant->idplant]['detail'])
-                        ->firstWhere('kriteria_id', $criteria->idkriteria);
-                    $normalized[$plant->idplant][$criteria->idkriteria] = $detail['normalized'];
-                }
-            }
-
-            // Prepare utility values array
-            $utility = [];
-            foreach ($plants as $plant) {
-                foreach ($criterias as $criteria) {
-                    $detail = collect($results[$plant->idplant]['detail'])
-                        ->firstWhere('kriteria_id', $criteria->idkriteria);
-                    $utility[$plant->idplant][$criteria->idkriteria] = $detail['weighted_utility'];
-                }
-            }
+            $topPlantROC = $rankedResultsROC[0] ?? null;
 
             return view('officer.rekomendasi.detail', [
                 'plants' => $plants,
@@ -343,10 +415,14 @@ class ORekomendasiController extends Controller
                 'results' => $results,
                 'criteriaRanges' => $criteriaRanges,
                 'rankedResults' => $rankedResults,
+                'rankedResultsROC' => $rankedResultsROC,
                 'normalizedWeights' => $normalizedWeights,
-                'normalized' => $normalized, // Add this line
+                'rocWeights' => $rocWeights,
+                'normalized' => $normalized,
                 'utility' => $utility,
+                'utilityROC' => $utilityROC,
                 'topPlant' => $topPlant,
+                'topPlantROC' => $topPlantROC,
                 'breadcrumb' => (object) [
                     'title' => 'Detail Perhitungan MAUT',
                     'list' => ['DSS Batching Plant', 'Rekomendasi', 'Detail']
@@ -475,10 +551,25 @@ class ORekomendasiController extends Controller
                 throw new \Exception("Data plant tidak ditemukan");
             }
 
-            $criterias = KriteriaModel::orderByRaw('LENGTH(kodekriteria), kodekriteria')->get();
+            $criterias = KriteriaModel::orderBy('bobotkriteria', 'desc')->get();
 
             if ($criterias->isEmpty()) {
                 throw new \Exception("Data kriteria tidak ditemukan");
+            }
+
+            // Calculate ROC weights
+            $n = $criterias->count();
+            $rocWeights = [];
+            foreach ($criterias as $index => $criteria) {
+                $rank = $index + 1;
+                $rocWeight = 0;
+
+                for ($i = $rank; $i <= $n; $i++) {
+                    $rocWeight += 1 / $i;
+                }
+                $rocWeight = $rocWeight / $n;
+
+                $rocWeights[$criteria->idkriteria] = $rocWeight;
             }
 
             // Inisialisasi variabel untuk view
@@ -543,7 +634,7 @@ class ORekomendasiController extends Controller
                     $marginalUtility = (exp(pow($normalizedValue, 2)) - 1) / 1.71;
 
                     // Hitung kontribusi kriteria dengan bobot (U_ij * W_j)
-                    $weightedUtility = $marginalUtility * $normalizedWeights[$criteria->idkriteria];
+                    $weightedUtility = $marginalUtility * $rocWeights[$criteria->idkriteria];
                     $totalUtility += $weightedUtility;
 
                     // Simpan data untuk view
@@ -589,6 +680,7 @@ class ORekomendasiController extends Controller
                 'topPlant' => $topPlant,
                 'criteriaRanges' => $criteriaRanges,
                 'normalizedWeights' => $normalizedWeights,
+                'rocWeights' => $rocWeights, // Make sure this is passed to the view
                 'breadcrumb' => (object) [
                     'title' => 'Detail Riwayat Perhitungan',
                     'list' => ['DSS Batching Plant', 'Rekomendasi', 'Riwayat', 'Detail']

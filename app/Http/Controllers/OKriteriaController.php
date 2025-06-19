@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Models\KriteriaModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -20,30 +21,42 @@ class OKriteriaController extends Controller
         $activeMenu = 'okriteria';
 
         // Ambil data langsung dengan filter
-        $query = KriteriaModel::select('idkriteria', 'kodekriteria', 'namakriteria', 'bobotkriteria','jeniskriteria');
-        
+        $query = KriteriaModel::select('idkriteria', 'kodekriteria', 'namakriteria', 'bobotkriteria', 'jeniskriteria');
+
         if ($request->has('kodekriteria') && !empty($request->kodekriteria)) {
             $query->where('kodekriteria', $request->kodekriteria);
         }
 
-        $okriteria = $query->get();
+        // Get all criteria ordered by their current weight (descending)
+        $okriteria = $query->orderBy('bobotkriteria', 'desc')->get();
 
-        $totalBobot = $okriteria->sum('bobotkriteria');
-    
-        // Tambahkan bobot normalisasi ke setiap kriteria
-        $okriteria->each(function ($item) use ($totalBobot) {
-            $item->bobotnormalisasi = $totalBobot > 0 ? $item->bobotkriteria / $totalBobot : 0;
+        // Calculate ROC weights
+        $n = $okriteria->count();
+        $totalRocWeight = 0;
+
+        $okriteria = $okriteria->map(function ($item, $index) use ($n) {
+            $rank = $index + 1;
+            $rocWeight = 0;
+
+            // ROC formula: (1/n) * Σ(1/i) for i from rank to n
+            for ($i = $rank; $i <= $n; $i++) {
+                $rocWeight += 1 / $i;
+            }
+            $rocWeight = $rocWeight / $n;
+
+            $item->bobotnormalisasi = $rocWeight;
+            return $item;
         });
 
+        // Calculate total ROC weight (should be approximately 1)
         $totalBobotNormalisasi = $okriteria->sum('bobotnormalisasi');
 
-        // $uniqueCodes = KriteriaModel::select('kodekriteria')->distinct()->pluck('kodekriteria');
         return view('officer.kriteria.index', [
             'breadcrumb' => $breadcrumb,
             'page' => $page,
             'activeMenu' => $activeMenu,
             'okriteria' => $okriteria,
-            'totalBobot' => $totalBobot,
+            'totalBobot' => $okriteria->sum('bobotkriteria'),
             'totalBobotNormalisasi' => $totalBobotNormalisasi
         ]);
     }
